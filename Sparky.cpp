@@ -30,7 +30,7 @@ public:
 	void Autonomous(void)
 	{
 		myRobot.SetSafetyEnabled(false);
-		while(IsAutonomous())
+		while(IsAutonomous()) // this is a change
 		{
 			gyro.Reset();
 			float angle = gyro.GetAngle() + 45; // get the angle from the gyro
