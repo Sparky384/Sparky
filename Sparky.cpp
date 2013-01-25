@@ -10,6 +10,7 @@ class RobotDemo : public SimpleRobot
 {
 	RobotDrive myRobot; // robot drive system
 	Joystick stick1, stick2; // only joystick
+	ADXL345_I2C adxl;
 	//Accelerometer acc;
 	//I2C acc2;
 
@@ -17,7 +18,8 @@ public:
 	RobotDemo(void):
 		myRobot(2, 3),	// these must be initialized in the same order
 		stick1(1),		// as they are declared above.
-		stick2(2)
+		stick2(2),
+		adxl(1, ADXL345_I2C::kRange_2G)
 	{
 		myRobot.SetExpiration(0.1);
 	}
@@ -51,47 +53,86 @@ public:
 	 */
 	void OperatorControl(void)
 	{
+		DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
 		myRobot.SetSafetyEnabled(true);
-		
+		bool motorinv = false;
 		/*
 		DigitalModule *dm = DigitalModule::GetInstance(2);
 		I2C *isc = dm->GetI2C(0x3A);
 		isc->Write(0x2D, 0x08);
 		*/
 		
-		ADXL345_I2C a(2);
-		
 		while (true)
 		{
-			myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, false);
-			myRobot.SetInvertedMotor(myRobot.kRearRightMotor, false);
-			
 			/*
-			DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Acceleration: ", acc.GetAcceleration());
-			dsLCD->UpdateLCD();
+			ADXL345_I2C::AllAxes ax = adxl.GetAccelerations();
+			//printf("X: %f, Y: %f, Z: %f", ax.XAxis, ax.YAxis, ax.ZAxis);
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "X: %f", ax.XAxis);
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f", ax.YAxis);
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f", ax.ZAxis);
 			*/
-			
-			DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Acceleration X: ",
-					a.GetAcceleration(a.kAxis_X));
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Acceleration Y: ",
-					a.GetAcceleration(a.kAxis_Y));
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Acceleration Z: ",
-					a.GetAcceleration(a.kAxis_Z));
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "X: %f",
+					adxl.GetAcceleration(ADXL345_I2C::kAxis_X));
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f",
+					adxl.GetAcceleration(ADXL345_I2C::kAxis_Y));
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f",
+					adxl.GetAcceleration(ADXL345_I2C::kAxis_Z));
+
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Motorinv: %d", motorinv);
 			dsLCD->UpdateLCD();
 			
-			if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
+			if(stick1.GetRawButton(2) || stick2.GetRawButton(2))
 			{
-				myRobot.TankDrive(stick1,stick2);
+				if(motorinv == false)
+				{
+					motorinv = true;
+				}
+				else if(motorinv == true)
+				{
+					motorinv = false;
+				}
 			}
-			else if(stick1.GetTrigger() == true && (stick2.GetTrigger() == false))
+			if(motorinv == false)
 			{
-				myRobot.ArcadeDrive(stick1);
+				myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, false);
+				myRobot.SetInvertedMotor(myRobot.kRearRightMotor, false);
+				if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
+				{
+					myRobot.TankDrive(stick1,stick2);
+				}
+				else if(stick1.GetTrigger() == true && (stick2.GetTrigger() == false))
+				{
+					myRobot.ArcadeDrive(stick1);
+				}
+				else if(stick2.GetTrigger() == true && (stick1.GetTrigger() == false))
+				{
+					myRobot.ArcadeDrive(stick2);
+				}
+				else
+				{
+					myRobot.TankDrive(0.0, 0.0);
+				}
 			}
-			else if(stick2.GetTrigger() == true && (stick1.GetTrigger() == false))
+			else if(motorinv == true)
 			{
-				myRobot.ArcadeDrive(stick2);
+				myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, true);
+				myRobot.SetInvertedMotor(myRobot.kRearRightMotor, true);
+				if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
+				{
+					myRobot.TankDrive(stick1,stick2);
+				}
+				else if(stick1.GetTrigger() == true && (stick2.GetTrigger() == false))
+				{
+					myRobot.ArcadeDrive(stick1);
+				}
+				else if(stick2.GetTrigger() == true && (stick1.GetTrigger() == false))
+				{
+					myRobot.ArcadeDrive(stick2);
+				}
+				else
+				{
+					myRobot.TankDrive(0.0, 0.0);
+				}
 			}
 			Wait(0.005);				// wait for a motor update time
 		}
