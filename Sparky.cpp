@@ -11,17 +11,25 @@ class RobotDemo : public SimpleRobot
 	RobotDrive myRobot; // robot drive system
 	Joystick stick1, stick2; // only joystick
 	ADXL345_I2C adxl;
-	//Accelerometer acc;
-	//I2C acc2;
+	Gyro gyro;
+	Relay *blinkylight;
+	DigitalInput trigger;
+	Encoder enc;
 
 public:
 	RobotDemo(void):
 		myRobot(2, 3),	// these must be initialized in the same order
 		stick1(1),		// as they are declared above.
 		stick2(2),
-		adxl(1, ADXL345_I2C::kRange_2G)
+		adxl(1, ADXL345_I2C::kRange_2G),
+		gyro(2),
+		trigger(11),
+		enc(1, 2)
 	{
 		myRobot.SetExpiration(0.1);
+		blinkylight = new Relay(4);
+		enc.Reset();
+		enc.Start();
 	}
 
 	/**
@@ -32,18 +40,15 @@ public:
 		myRobot.SetSafetyEnabled(false);
 		while(IsAutonomous()) // this is a change
 		{
-			/*
 			gyro.Reset();
-			float angle = gyro.GetAngle() + 45; // get the angle from the gyro
+			/*
+			float angle = gyro.GetAngle() + 45;
 			myRobot.Drive(0.5, -angle / 30);
-			float speed = acc.GetAcceleration();
-			DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
-			dsLCD->Clear();
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro Value: %f", gyro.GetAngle());
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Acceleration: %f", acc.GetAcceleration());
-			dsLCD->UpdateLCD();
 			*/
-			Wait(2.0);
+			DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+			dsLCD->UpdateLCD();
+			Wait(0.05);
 		}
 		myRobot.Drive(0.0, 0.0);
 	}
@@ -53,6 +58,8 @@ public:
 	 */
 	void OperatorControl(void)
 	{
+		gyro.Reset();
+		gyro.SetSensitivity(0.007);
 		DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
 		myRobot.SetSafetyEnabled(true);
 		bool motorinv = false;
@@ -77,7 +84,8 @@ public:
 					adxl.GetAcceleration(ADXL345_I2C::kAxis_Y));
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f",
 					adxl.GetAcceleration(ADXL345_I2C::kAxis_Z));
-
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro: %f", gyro.GetAngle());
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Encoder: %d", enc.Get());
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Motorinv: %d", motorinv);
 			dsLCD->UpdateLCD();
 			
@@ -92,48 +100,25 @@ public:
 					motorinv = false;
 				}
 			}
-			if(motorinv == false)
+			myRobot.SetInvertedMotor(myRobot.kRearRightMotor, motorinv);
+			myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, motorinv);
+			if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
 			{
-				myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, false);
-				myRobot.SetInvertedMotor(myRobot.kRearRightMotor, false);
-				if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
-				{
-					myRobot.TankDrive(stick1,stick2);
-				}
-				else if(stick1.GetTrigger() == true && (stick2.GetTrigger() == false))
-				{
-					myRobot.ArcadeDrive(stick1);
-				}
-				else if(stick2.GetTrigger() == true && (stick1.GetTrigger() == false))
-				{
-					myRobot.ArcadeDrive(stick2);
-				}
-				else
-				{
-					myRobot.TankDrive(0.0, 0.0);
-				}
+				myRobot.TankDrive(stick1,stick2);
 			}
-			else if(motorinv == true)
+			else if(stick1.GetTrigger() == true && (stick2.GetTrigger() == false))
 			{
-				myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, true);
-				myRobot.SetInvertedMotor(myRobot.kRearRightMotor, true);
-				if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
-				{
-					myRobot.TankDrive(stick1,stick2);
+				myRobot.ArcadeDrive(stick1);
 				}
-				else if(stick1.GetTrigger() == true && (stick2.GetTrigger() == false))
-				{
-					myRobot.ArcadeDrive(stick1);
-				}
-				else if(stick2.GetTrigger() == true && (stick1.GetTrigger() == false))
-				{
-					myRobot.ArcadeDrive(stick2);
-				}
-				else
-				{
-					myRobot.TankDrive(0.0, 0.0);
-				}
+			else if(stick2.GetTrigger() == true && (stick1.GetTrigger() == false))
+			{
+				myRobot.ArcadeDrive(stick2);
 			}
+			else
+			{
+				myRobot.TankDrive(0.0, 0.0);
+			}
+			blinkylight->Set(Relay::kForward);
 			Wait(0.005);				// wait for a motor update time
 		}
 	}
