@@ -15,7 +15,14 @@ class RobotDemo : public SimpleRobot
 	Relay *blinkylight;
 	DigitalInput trigger;
 	Encoder enc;
-
+	DriverStation *ds;
+	DriverStationLCD *dsLCD;
+	//Rookie code
+	//RobotDrive mypurpledog;
+	//Joystick high1;
+	
+	
+	
 public:
 	RobotDemo(void):
 		myRobot(2, 3),	// these must be initialized in the same order
@@ -24,7 +31,9 @@ public:
 		adxl(1, ADXL345_I2C::kRange_2G),
 		gyro(2),
 		trigger(11),
-		enc(1, 2)
+		enc(3, 4),
+		ds(DriverStation::GetInstance()),
+		dsLCD(DriverStationLCD::GetInstance())
 	{
 		myRobot.SetExpiration(0.1);
 		blinkylight = new Relay(4);
@@ -38,17 +47,50 @@ public:
 	void Autonomous(void)
 	{
 		myRobot.SetSafetyEnabled(false);
-		while(IsAutonomous()) // this is a change
+		enc.Reset();
+		while(IsAutonomous() && IsEnabled()) // this is a change
 		{
+			myRobot.SetInvertedMotor(myRobot.kRearRightMotor, true);
+			myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, true);
 			gyro.Reset();
-			/*
-			float angle = gyro.GetAngle() + 45;
-			myRobot.Drive(0.5, -angle / 30);
-			*/
-			DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-			dsLCD->UpdateLCD();
-			Wait(0.05);
+			//autonomous code for the outer corner of the pyramid, only holding two discs
+			if(ds->GetDigitalIn(1))
+			{
+				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+				dsLCD->UpdateLCD();
+				Wait(0.05);
+				myRobot.Drive(0.5, 0.0);
+				Wait(2.0);
+				myRobot.Drive(0.0, 0.0);
+				Wait(1.0);
+				do
+				{
+					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+					dsLCD->UpdateLCD();
+					myRobot.Drive(0.5, 1.0);
+					Wait(0.05);
+				}
+				while(gyro.GetAngle() <= 10 || gyro.GetAngle() >= -10);
+				myRobot.Drive(0.0, 0.0);
+				blinkylight->Set(Relay::kForward);
+				dsLCD->UpdateLCD();
+				Wait(15.0);
+			}
+			else if(ds->GetDigitalIn(2))
+			{
+				blinkylight->Set(Relay::kForward);
+				myRobot.Drive(1.0, 0.0);
+				Wait(0.9);
+				myRobot.Drive(0.0, 0.0);
+				Wait(15.0);
+			}
+			else
+			{
+				myRobot.Drive(0.0, 0.0);
+				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+				dsLCD->UpdateLCD();
+			}
+			myRobot.Drive(0.0, 0.0);
 		}
 		myRobot.Drive(0.0, 0.0);
 	}
@@ -59,16 +101,22 @@ public:
 	void OperatorControl(void)
 	{
 		gyro.Reset();
-		gyro.SetSensitivity(0.007);
-		DriverStationLCD *dsLCD = DriverStationLCD::GetInstance();
+		gyro.SetSensitivity(0.0062);
 		myRobot.SetSafetyEnabled(true);
 		bool motorinv = false;
+		//Rookie crap
+		//If(high1.GetTrigger()== true)
+		
 		/*
 		DigitalModule *dm = DigitalModule::GetInstance(2);
 		I2C *isc = dm->GetI2C(0x3A);
 		isc->Write(0x2D, 0x08);
 		*/
-		
+		/*xAngle = Math.toDegrees(getAxesMeasurements().XAxis);
+		xAngleFiltered = Constants.hfc * xAngleFiltered + (1 - Constants.hfc) * xAngle;
+		gyroError = xAngleFiltered - supaGyro.getAngle();
+		Get the actual Angle of the bot
+		angle = Constants.lfc * ((angle + (supaGyro.getAngle() + gyroError)) / 2) + (1 - Constants.lfc) * xAngle;*/
 		while (true)
 		{
 			/*
@@ -78,13 +126,23 @@ public:
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f", ax.YAxis);
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f", ax.ZAxis);
 			*/
+			float angle = gyro.GetAngle();
+			if(gyro.GetAngle() > 360)
+			{
+				angle=-360.0;
+			}
+			else if(gyro.GetAngle() < -360)
+			{
+				angle=+360.0;
+			}
+			
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "X: %f",
 					adxl.GetAcceleration(ADXL345_I2C::kAxis_X));
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f",
 					adxl.GetAcceleration(ADXL345_I2C::kAxis_Y));
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f",
 					adxl.GetAcceleration(ADXL345_I2C::kAxis_Z));
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro: %f", gyro.GetAngle());
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro: %f", angle);
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Encoder: %d", enc.Get());
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Motorinv: %d", motorinv);
 			dsLCD->UpdateLCD();
@@ -100,6 +158,16 @@ public:
 					motorinv = false;
 				}
 			}
+			
+			if(stick1.GetRawButton(7))
+			{
+				gyro.Reset();
+			}
+			else
+			{
+				
+			}
+			
 			myRobot.SetInvertedMotor(myRobot.kRearRightMotor, motorinv);
 			myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, motorinv);
 			if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
@@ -118,7 +186,14 @@ public:
 			{
 				myRobot.TankDrive(0.0, 0.0);
 			}
-			blinkylight->Set(Relay::kForward);
+			if(stick1.GetRawButton(10))
+			{
+				blinkylight->Set(Relay::kForward);
+			}
+			else 
+			{
+				blinkylight->Set(Relay::kOff);
+			}
 			Wait(0.005);				// wait for a motor update time
 		}
 	}
