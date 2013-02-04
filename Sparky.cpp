@@ -70,7 +70,7 @@ public:
 					myRobot.Drive(0.5, 1.0);
 					Wait(0.05);
 				}
-				while(gyro.GetAngle() <= 10 || gyro.GetAngle() >= -10);
+				while(gyro.GetAngle() <= 45.0 && gyro.GetAngle() >= -45.0);
 				myRobot.Drive(0.0, 0.0);
 				blinkylight->Set(Relay::kForward);
 				dsLCD->UpdateLCD();
