@@ -25,7 +25,7 @@ class RobotDemo : public SimpleRobot
 	
 public:
 	RobotDemo(void):
-		myRobot(2, 3),	// these must be initialized in the same order
+		myRobot(2, 1),	// these must be initialized in the same order
 		stick1(1),		// as they are declared above.
 		stick2(2),
 		adxl(1, ADXL345_I2C::kRange_2G),
@@ -36,7 +36,7 @@ public:
 		dsLCD(DriverStationLCD::GetInstance())
 	{
 		myRobot.SetExpiration(0.1);
-		blinkylight = new Relay(4);
+		blinkylight = new Relay(1);
 		enc.Reset();
 		enc.Start();
 	}
@@ -48,17 +48,17 @@ public:
 	{
 		myRobot.SetSafetyEnabled(false);
 		enc.Reset();
+		gyro.SetSensitivity(0.05);
 		while(IsAutonomous() && IsEnabled()) // this is a change
 		{
 			myRobot.SetInvertedMotor(myRobot.kRearRightMotor, true);
 			myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, true);
 			gyro.Reset();
-			//autonomous code for the outer corner of the pyramid, only holding two discs
 			if(ds->GetDigitalIn(1))
 			{
 				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
 				dsLCD->UpdateLCD();
-				Wait(0.05);
+				//Wait(0.05);
 				myRobot.Drive(0.5, 0.0);
 				Wait(2.0);
 				myRobot.Drive(0.0, 0.0);
@@ -104,8 +104,6 @@ public:
 		gyro.SetSensitivity(0.0062);
 		myRobot.SetSafetyEnabled(true);
 		bool motorinv = false;
-		//Rookie crap
-		//If(high1.GetTrigger()== true)
 		
 		/*
 		DigitalModule *dm = DigitalModule::GetInstance(2);
@@ -186,14 +184,14 @@ public:
 			{
 				myRobot.TankDrive(0.0, 0.0);
 			}
-			if(stick1.GetRawButton(10))
-			{
+			//if(stick1.GetRawButton(10))
+			//{
 				blinkylight->Set(Relay::kForward);
-			}
+			/*}
 			else 
 			{
 				blinkylight->Set(Relay::kOff);
-			}
+			}*/
 			Wait(0.005);				// wait for a motor update time
 		}
 	}
