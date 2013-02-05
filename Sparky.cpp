@@ -25,7 +25,7 @@ class RobotDemo : public SimpleRobot
 	
 public:
 	RobotDemo(void):
-		myRobot(2, 1),	// these must be initialized in the same order
+		myRobot(2, 3),	// these must be initialized in the same order
 		stick1(1),		// as they are declared above.
 		stick2(2),
 		adxl(1, ADXL345_I2C::kRange_2G),
@@ -48,7 +48,7 @@ public:
 	{
 		myRobot.SetSafetyEnabled(false);
 		enc.Reset();
-		gyro.SetSensitivity(0.05);
+		gyro.SetSensitivity(0.007);
 		while(IsAutonomous() && IsEnabled()) // this is a change
 		{
 			myRobot.SetInvertedMotor(myRobot.kRearRightMotor, true);
@@ -70,7 +70,7 @@ public:
 					myRobot.Drive(0.5, 1.0);
 					Wait(0.05);
 				}
-				while(gyro.GetAngle() <= 45.0 && gyro.GetAngle() >= -45.0);
+				while(gyro.GetAngle() <= 90.0 && gyro.GetAngle() >= -90.0);
 				myRobot.Drive(0.0, 0.0);
 				blinkylight->Set(Relay::kForward);
 				dsLCD->UpdateLCD();
@@ -81,6 +81,23 @@ public:
 				blinkylight->Set(Relay::kForward);
 				myRobot.Drive(1.0, 0.0);
 				Wait(0.9);
+				myRobot.Drive(0.0, 0.0);
+				Wait(15.0);
+			}
+			else if(ds->GetDigitalIn(3))
+			{
+				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+				dsLCD->UpdateLCD();
+				do
+				{
+					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+					dsLCD->UpdateLCD();
+					myRobot.Drive(0.5, 1.0);
+					Wait(0.05);
+				}
+				while(gyro.GetAngle() <= 45.0 && gyro.GetAngle() >= -45.0);
+				myRobot.Drive(0.5, 0.0);
+				Wait(2.0);
 				myRobot.Drive(0.0, 0.0);
 				Wait(15.0);
 			}
@@ -180,18 +197,31 @@ public:
 			{
 				myRobot.ArcadeDrive(stick2);
 			}
+			else if(stick1.GetTrigger() == true && stick2.GetTrigger() == true && (stick1.GetRawButton(3) || stick2.GetRawButton(3)))
+			{
+				stick1.GetX()/2;
+				stick1.GetY()/2;
+				stick2.GetX()/2;
+				stick2.GetY()/2;
+				myRobot.TankDrive(stick1, stick2);
+			}
+			else if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == false) && (stick1.GetRawButton(3) == true))
+			{
+				stick1.GetX()/2;
+				stick1.GetY()/2;
+				myRobot.ArcadeDrive(stick1);
+			}
+			else if(stick1.GetTrigger() == false && stick2.GetTrigger() == true && stick2.GetRawButton(3) == true)
+			{
+				stick2.GetX()/2;
+				stick2.GetY()/2;
+				myRobot.ArcadeDrive(stick2);
+			}
 			else
 			{
 				myRobot.TankDrive(0.0, 0.0);
 			}
-			//if(stick1.GetRawButton(10))
-			//{
 				blinkylight->Set(Relay::kForward);
-			/*}
-			else 
-			{
-				blinkylight->Set(Relay::kOff);
-			}*/
 			Wait(0.005);				// wait for a motor update time
 		}
 	}
