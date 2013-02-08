@@ -10,16 +10,13 @@ class RobotDemo : public SimpleRobot
 {
 	RobotDrive myRobot; // robot drive system
 	Joystick stick1, stick2; // only joystick
-	ADXL345_I2C adxl;
 	Gyro gyro;
+	//ADXL345_SPI adxl;
 	Relay *blinkylight;
 	DigitalInput trigger;
 	Encoder enc;
 	DriverStation *ds;
 	DriverStationLCD *dsLCD;
-	//Rookie code
-	//RobotDrive mypurpledog;
-	//Joystick high1;
 	
 	
 	
@@ -28,8 +25,8 @@ public:
 		myRobot(2, 3),	// these must be initialized in the same order
 		stick1(1),		// as they are declared above.
 		stick2(2),
-		adxl(1, ADXL345_I2C::kRange_2G),
 		gyro(2),
+		//adxl(5, 6, 7, 8, ADXL345_SPI::kRange_2G),
 		trigger(11),
 		enc(3, 4),
 		ds(DriverStation::GetInstance()),
@@ -56,11 +53,19 @@ public:
 			gyro.Reset();
 			if(ds->GetDigitalIn(1))
 			{
+				blinkylight->Set(Relay::kForward);
+				myRobot.Drive(0.5, 0.0);
+				Wait(0.5);
+				myRobot.Drive(0.0, 0.0);
+				Wait(15.0);
+			}
+			else if(ds->GetDigitalIn(2))
+			{
 				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
 				dsLCD->UpdateLCD();
-				//Wait(0.05);
+				blinkylight->Set(Relay::kForward);
 				myRobot.Drive(0.5, 0.0);
-				Wait(2.0);
+				Wait(3.5);
 				myRobot.Drive(0.0, 0.0);
 				Wait(1.0);
 				do
@@ -68,19 +73,12 @@ public:
 					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
 					dsLCD->UpdateLCD();
 					myRobot.Drive(0.5, 1.0);
-					Wait(0.05);
 				}
-				while(gyro.GetAngle() <= 90.0 && gyro.GetAngle() >= -90.0);
+				while(gyro.GetAngle() <= 35.0 && gyro.GetAngle() >= -35.0);
 				myRobot.Drive(0.0, 0.0);
-				blinkylight->Set(Relay::kForward);
-				dsLCD->UpdateLCD();
-				Wait(15.0);
-			}
-			else if(ds->GetDigitalIn(2))
-			{
-				blinkylight->Set(Relay::kForward);
-				myRobot.Drive(1.0, 0.0);
-				Wait(0.9);
+				Wait(1.0);
+				myRobot.Drive(0.5, 0.0);
+				Wait(2.5);
 				myRobot.Drive(0.0, 0.0);
 				Wait(15.0);
 			}
@@ -88,6 +86,47 @@ public:
 			{
 				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
 				dsLCD->UpdateLCD();
+				myRobot.Drive(0.5, 0.0);
+				Wait(3.0);
+				myRobot.Drive(0.0, 0.0);
+				Wait(1.0);
+				do
+				{
+					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+					dsLCD->UpdateLCD();
+					myRobot.Drive(0.5, -1.0);
+				}
+				while(gyro.GetAngle() <= 45.0 && gyro.GetAngle() >= -45.0);
+				myRobot.Drive(0.0, 0.0);
+				Wait(1.0);
+				myRobot.Drive(0.5, 0.0);
+				Wait(2.5);
+				myRobot.Drive(0.0, 0.0);
+				Wait(15.0);
+			}
+			else if(ds->GetDigitalIn(4))
+			{
+				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+				dsLCD->UpdateLCD();
+				myRobot.Drive(0.5, 0.0);
+				Wait(3.5);
+				myRobot.Drive(0.0, 0.0);
+				Wait(1.0);
+				do
+				{
+					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+					dsLCD->UpdateLCD();
+					myRobot.Drive(0.5, -1.0);
+					Wait(0.05);
+				}
+				while(gyro.GetAngle() <= 90.0 && gyro.GetAngle() >= -90.0);
+				myRobot.Drive(0.0, 0.0);
+				Wait(0.5);
+				myRobot.Drive(0.5, 0.0);
+				Wait(3.5);
+				myRobot.Drive(0.0, 0.0);
+				Wait(0.5);
+				gyro.Reset();
 				do
 				{
 					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
@@ -95,11 +134,26 @@ public:
 					myRobot.Drive(0.5, 1.0);
 					Wait(0.05);
 				}
-				while(gyro.GetAngle() <= 45.0 && gyro.GetAngle() >= -45.0);
+				while(gyro.GetAngle() <= 35.0 && gyro.GetAngle() >= -35.0);
+				myRobot.Drive(0.0, 0.0);
+				Wait(1.0);
 				myRobot.Drive(0.5, 0.0);
-				Wait(2.0);
+				Wait(2.5);
 				myRobot.Drive(0.0, 0.0);
 				Wait(15.0);
+				
+			}
+			else if(ds->GetDigitalIn(5))
+			{
+				//Autonomous that will go under the pyramid from quad 4.
+			}
+			else if(ds->GetDigitalIn(6))
+			{
+				//Autonomous that will go around another "robot" from quad 4.
+			}
+			else if(ds->GetDigitalIn(7))
+			{
+				//Ask Clarke what he wants
 			}
 			else
 			{
@@ -120,7 +174,7 @@ public:
 		gyro.Reset();
 		gyro.SetSensitivity(0.0062);
 		myRobot.SetSafetyEnabled(true);
-		bool motorinv = false;
+		bool motorinv = true;
 		
 		/*
 		DigitalModule *dm = DigitalModule::GetInstance(2);
@@ -134,29 +188,39 @@ public:
 		angle = Constants.lfc * ((angle + (supaGyro.getAngle() + gyroError)) / 2) + (1 - Constants.lfc) * xAngle;*/
 		while (true)
 		{
-			/*
-			ADXL345_I2C::AllAxes ax = adxl.GetAccelerations();
+			
+			//ADXL345_SPI::AllAxes ax = adxl.GetAccelerations();
 			//printf("X: %f, Y: %f, Z: %f", ax.XAxis, ax.YAxis, ax.ZAxis);
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "X: %f", ax.XAxis);
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f", ax.YAxis);
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f", ax.ZAxis);
+			//dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "X: %f", ax.XAxis);
+			//dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f", ax.YAxis);
+			//dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f", ax.ZAxis);
+			
+		/*	if(ax.YAxis >= 68)
+			{
+				blinkylight->Set(Relay::kForward);
+			}
+			else
+			{
+				blinkylight->Set(Relay::kOff);
+			}
 			*/
+			
 			float angle = gyro.GetAngle();
 			if(gyro.GetAngle() > 360)
 			{
-				angle=-360.0;
+				angle-=360.0;
 			}
 			else if(gyro.GetAngle() < -360)
 			{
-				angle=+360.0;
+				angle+=360.0;
 			}
 			
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "X: %f",
-					adxl.GetAcceleration(ADXL345_I2C::kAxis_X));
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f",
-					adxl.GetAcceleration(ADXL345_I2C::kAxis_Y));
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f",
-					adxl.GetAcceleration(ADXL345_I2C::kAxis_Z));
+	//		dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "X: %f",
+		//			adxl.GetAcceleration(ADXL345_SPI::kAxis_X));
+			//dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f",
+			//		adxl.GetAcceleration(ADXL345_SPI::kAxis_Y));
+			//dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f",
+				//	adxl.GetAcceleration(ADXL345_SPI::kAxis_Z)); 
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro: %f", angle);
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Encoder: %d", enc.Get());
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Motorinv: %d", motorinv);
@@ -171,6 +235,10 @@ public:
 				else if(motorinv == true)
 				{
 					motorinv = false;
+				}
+				else
+				{
+					motorinv = motorinv;
 				}
 			}
 			
