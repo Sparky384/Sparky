@@ -19,8 +19,6 @@ class RobotDemo : public SimpleRobot
 	DriverStation *ds;
 	DriverStationLCD *dsLCD;
 	
-	
-	
 public:
 	RobotDemo(void):
 		myRobot(2, 1),	// these must be initialized in the same order
@@ -29,8 +27,8 @@ public:
 		gyro(2),
 		//adxl(5, 6, 7, 8, ADXL345_SPI::kRange_2G),
 		trigger(11),
-		enc(2, 1),
-		enc2(14, 13),
+		enc(1, 2),
+		enc2(13, 14),
 		ds(DriverStation::GetInstance()),
 		dsLCD(DriverStationLCD::GetInstance())
 	{
@@ -45,6 +43,74 @@ public:
 	/**
 	 * Drive left & right motors for 2 seconds then stop
 	 */
+	bool EncDriveLimit(int length)
+	{
+		if (abs((enc.Get() + enc2.Get())/2) <= length)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	void Drive(int distance)
+	{
+		while(EncDriveLimit(distance))
+		{
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", (enc.Get() + enc.Get())/2);
+			dsLCD->UpdateLCD();
+			myRobot.Drive(-1.0, 0.0);
+			
+		}
+		enc.Reset();
+		enc2.Reset();
+		gyro.Reset();
+		myRobot.Drive(0.0, 0.0);
+		Wait(1.0);
+	}
+	void RTurn(double angle)
+	{
+		while(gyro.GetAngle() <= angle && gyro.GetAngle() >= -angle)
+		{
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+			dsLCD->UpdateLCD();
+			myRobot.Drive(0.3, -1.0);
+		}
+		enc.Reset();
+		enc2.Reset();
+		gyro.Reset();
+		myRobot.Drive(0.0, 0.0);
+		Wait(1.0);	
+	}
+	void LTurn(double angle)
+	{
+
+		while(gyro.GetAngle() <= angle && gyro.GetAngle() >= -angle)
+		{
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+			dsLCD->UpdateLCD();
+			myRobot.Drive(0.3, 1.0);
+		}
+		enc.Reset();
+		enc2.Reset();
+		gyro.Reset();
+		myRobot.Drive(0.0, 0.0);
+		Wait(1.0);
+	}
+	void Stop()
+	{
+		myRobot.Drive(0.0, 0.0);
+		Wait (15.0);
+	}
+	void Reset()
+	{
+		enc.Reset();
+		enc2.Reset();
+		gyro.Reset();
+	}
+	
 	void Autonomous(void)
 	{
 		myRobot.SetSafetyEnabled(false);
@@ -56,380 +122,77 @@ public:
 			myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, true);
 			enc.Reset();
 			gyro.Reset();
-
 			if(ds->GetDigitalIn(1)) //QUADRANT 1 - DRIVE STRAIGHT
 			{
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-				dsLCD->UpdateLCD();
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					myRobot.Drive(1.0, 0.0);
-					
-				}
-				enc.Reset();
-				enc2.Reset();
-				
+				Reset();
+				Drive(2300);
 				blinkylight->Set(Relay::kForward);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				myRobot.Drive(0.0, 0.0);
-				Wait(15.0);
+				Stop();
 			}
 			else if(ds->GetDigitalIn(2)) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
 			{
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-				dsLCD->UpdateLCD();
-				blinkylight->Set(Relay::kForward);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(gyro.GetAngle() <= 35.0 && gyro.GetAngle() >= -35.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, 1.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(15.0);
+				Reset();
+				Drive(1900);
+				LTurn(18.0);
+				Drive(2450);
+				Stop();
 			}
 			else if(ds->GetDigitalIn(3)) // QUADRANT 3 - DRIVE STRAIGHT, TURN 90 DEGREES, THEN IMPLEMENT INPUT 2
 			{
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-				dsLCD->UpdateLCD();
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(gyro.GetAngle() <= 90.0 && gyro.GetAngle() >= -90.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, -1.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(0.5);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(0.5);
-				gyro.Reset();
-				while(gyro.GetAngle() <= 35.0 && gyro.GetAngle() >= -35.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, 1.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(15.0);
+				Reset();
+				Drive(200);
+				RTurn(90.0);
+				Drive(200);
+				LTurn(35.0);
+				Drive(200);
+				Stop();
 			}
 			else if(ds->GetDigitalIn(4)) //DRIVE STRAIGHT, THEN TURN 45 TO GOAL
 			{
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-				dsLCD->UpdateLCD();
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(gyro.GetAngle() <= 45.0 && gyro.GetAngle() >= -45.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, -1.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(15.0);
+				Reset();
+				Drive(200);
+				RTurn(45.0);
+				Drive(200);
+				Stop();
 			}
 			else if(ds->GetDigitalIn(5)) //DRIVE UNDER PYRAMID, TURN 90, THEN INPUT 2 CODE
 			{
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-				dsLCD->UpdateLCD();
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(gyro.GetAngle() <= 90.0 && gyro.GetAngle() >= -90.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, -1.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				//gyro.Reset();
-				while(gyro.GetAngle() <= 35.0 && gyro.GetAngle() >= -35.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, 1.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(15.0);
+				Reset();
+				Drive(200);
+				RTurn(90.0);
+				Drive(200);
+				LTurn(35.0);
+				Drive(200);
+				Stop();
 			}
 			else if(ds->GetDigitalIn(6)) //TURN LEFT 90, DRIVE, THEN TURN LEFT 90, IMPLEMENT INPUT 4 CODE
 			{
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-				dsLCD->UpdateLCD();
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(gyro.GetAngle() <= 90.0 && gyro.GetAngle() >= -90.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, 1.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				gyro.Reset();
-				while(gyro.GetAngle() <= 90.0 && gyro.GetAngle() >= -90.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, 1.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				gyro.Reset();
-				while(gyro.GetAngle() <= 45.0 && gyro.GetAngle() >= -45.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, -1.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(15.0);
+				Drive(200);
+				LTurn(90.0);
+				Drive(200);
+				LTurn(90.0);
+				Drive(200);
+				RTurn(45.0);
+				Drive(200);
+				Stop();
 			}
 			else if(ds->GetDigitalIn(7)) // SHORT STRAIGHT DRIVE, TURN 90, FORWARD, 45 TURN, DRIVE TO GOAL
 			{
-				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-				dsLCD->UpdateLCD();
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(gyro.GetAngle() <= 90.0 && gyro.GetAngle() >= -90.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, -1.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(1.0);
-				while(gyro.GetAngle() <= 45.0 && gyro.GetAngle() >= -45.0)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-					dsLCD->UpdateLCD();
-					myRobot.Drive(0.5, 1.0);
-					Wait(0.05);
-				}
-				enc.Reset();
-				enc2.Reset();
-				gyro.Reset();
-				while(enc.GetEncoderAverage(enc.Get(), enc2.Get()) <= 10)
-				{
-					dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", enc.GetEncoderAverage(enc.Get(), enc2.Get()));
-					dsLCD->UpdateLCD();
-					myRobot.Drive(1.0, 0.0);
-				}
-				enc.Reset();
-				enc2.Reset();
-				myRobot.Drive(0.0, 0.0);
-				Wait(15.0);
+				Drive(200);
+				RTurn(90.0);
+				Drive(200);
+				LTurn(45.0);
+				Drive(200);
+				Stop();
 			}
 			else
 			{
-				myRobot.Drive(0.0, 0.0);
 				dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
-				dsLCD->UpdateLCD();
+				Stop();
 			}
-			myRobot.Drive(0.0, 0.0);
+			Stop();
 		}
-		myRobot.Drive(0.0, 0.0);
+		Stop();
 	}
 
 	/**
@@ -444,13 +207,6 @@ public:
 		
 		while (true)
 		{
-			
-			//ADXL345_SPI::AllAxes ax = adxl.GetAccelerations();
-			//printf("X: %f, Y: %f, Z: %f", ax.XAxis, ax.YAxis, ax.ZAxis);
-			//dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "X: %f", ax.XAxis);
-			//dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Y: %f", ax.YAxis);
-			//dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Z: %f", ax.ZAxis);
-			
 			float angle = gyro.GetAngle();
 			if(gyro.GetAngle() > 360)
 			{
@@ -462,8 +218,8 @@ public:
 			}
 
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Gyro: %f", angle);
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Encoder: %d", enc.Get());
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Encoder 2: %d", enc2.Get());
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Encoder: %i", enc.Get());
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Encoder 2: %i", enc2.Get());
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Motorinv: %d", motorinv);
 			dsLCD->UpdateLCD();
 			
@@ -487,6 +243,12 @@ public:
 			{
 				gyro.Reset();
 			}
+			if(stick1.GetRawButton(9))
+			{
+				enc.Reset();
+				enc2.Reset();
+			}
+			
 			myRobot.SetInvertedMotor(myRobot.kRearRightMotor, motorinv);
 			myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, motorinv);
 			if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
@@ -525,7 +287,7 @@ public:
 			{
 				myRobot.TankDrive(0.0, 0.0);
 			}
-				blinkylight->Set(Relay::kForward);
+			blinkylight->Set(Relay::kForward);
 			Wait(0.005);				// Wait for a motor update time
 		}
 	}
