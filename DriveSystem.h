@@ -9,12 +9,15 @@ private:
 	RobotDrive myRobot; // robot drive system
 	Joystick stick1, stick2; // only joystick
 	Gyro gyro;
-	//ADXL345_SPI adxl;
+	ADXL345_SPI adxl;
 	DigitalInput trigger;
 	Encoder enc;
 	Encoder enc2;
 	DriverStation *ds;
 	DriverStationLCD *dsLCD;
+	Encoder climbenc;
+	DigitalInput ls;
+
 	
 public:
 	DriveSystem(void);
@@ -25,6 +28,7 @@ public:
 	void Stop();
 	void Reset();
 	void GyroReset();
+	void ClimbTower();
 	void EncReset();
 	bool InvertMotors(bool tf);
 	bool Safety(bool tf);

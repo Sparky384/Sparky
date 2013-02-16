@@ -10,24 +10,23 @@
 class RobotDemo : public SimpleRobot
 {
 	Joystick stick1, stick2; // only joystick
-	//ADXL345_SPI adxl;
 	Relay *blinkylight;
-	DigitalInput trigger;
 	DriverStation *ds;
 	DriverStationLCD *dsLCD;
 	DriveSystem sparky;
+	Compressor *compressor;
 	
 public:
 	RobotDemo(void):
 		stick1(1),		// as they are declared above.
 		stick2(2),
-		//adxl(5, 6, 7, 8, ADXL345_SPI::kRange_2G),
-		trigger(11),
 		ds(DriverStation::GetInstance()),
 		dsLCD(DriverStationLCD::GetInstance()),
 		sparky()
 	{
 		blinkylight = new Relay(1);
+		compressor = new Compressor(2, 3); // CHANGE THESE PORTS
+		compressor->Start();
 	}
 
 	/**
@@ -53,57 +52,57 @@ public:
 			else if(ds->GetDigitalIn(2)) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
 			{
 				sparky.Reset();
-				sparky.Drive(1900);
-				sparky.LTurn(18.0);
-				sparky.Drive(2450);
+				sparky.Drive(1572);
+				sparky.LTurn(35.0);
+				sparky.Drive(2377);
 				sparky.Stop();
 			}
 			else if(ds->GetDigitalIn(3)) // QUADRANT 3 - DRIVE STRAIGHT, TURN 90 DEGREES, THEN IMPLEMENT INPUT 2
 			{
 				sparky.Reset();
-				sparky.Drive(200);
+				sparky.Drive(2377);
 				sparky.RTurn(90.0);
-				sparky.Drive(200);
+				sparky.Drive(1572);
 				sparky.LTurn(35.0);
-				sparky.Drive(200);
+				sparky.Drive(2377);
 				sparky.Stop();
 			}
 			else if(ds->GetDigitalIn(4)) //DRIVE STRAIGHT, THEN TURN 45 TO GOAL
 			{
 				sparky.Reset();
-				sparky.Drive(200);
+				sparky.Drive(2242);
 				sparky.RTurn(45.0);
-				sparky.Drive(200);
+				sparky.Drive(2300);
 				sparky.Stop();
 			}
 			else if(ds->GetDigitalIn(5)) //DRIVE UNDER PYRAMID, TURN 90, THEN INPUT 2 CODE
 			{
 				sparky.Reset();
-				sparky.Drive(200);
+				sparky.Drive(1610);
 				sparky.RTurn(90.0);
-				sparky.Drive(200);
+				sparky.Drive(1073);
 				sparky.LTurn(35.0);
-				sparky.Drive(200);
+				sparky.Drive(2300);
 				sparky.Stop();
 			}
 			else if(ds->GetDigitalIn(6)) //TURN LEFT 90, DRIVE, THEN TURN LEFT 90, IMPLEMENT INPUT 4 CODE
 			{
-				sparky.Drive(200);
+				sparky.Drive(460);
 				sparky.LTurn(90.0);
-				sparky.Drive(200);
+				sparky.Drive(1150);
 				sparky.LTurn(90.0);
-				sparky.Drive(200);
+				sparky.Drive(2242);
 				sparky.RTurn(45.0);
-				sparky.Drive(200);
+				sparky.Drive(2300);
 				sparky.Stop();
 			}
 			else if(ds->GetDigitalIn(7)) // SHORT STRAIGHT DRIVE, TURN 90, FORWARD, 45 TURN, DRIVE TO GOAL
 			{
-				sparky.Drive(200);
+				sparky.Drive(460);
 				sparky.RTurn(90.0);
-				sparky.Drive(200);
-				sparky.LTurn(45.0);
-				sparky.Drive(200);
+				sparky.Drive(1073);
+				sparky.LTurn(35.0);
+				sparky.Drive(1610);
 				sparky.Stop();
 			}
 			else
@@ -121,32 +120,15 @@ public:
 	 */
 	void OperatorControl(void)
 	{
+		
 		sparky.Reset();
 		sparky.GyroSens();
 		sparky.Safety(true);
-		bool motorinv = true;
 		
 		while (true)
 		{
 			sparky.GyroFixAngles();
 			sparky.Printlines();
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Motorinv: %d", motorinv);
-			
-			if(stick1.GetRawButton(2) || stick2.GetRawButton(2))
-			{
-				if(motorinv == false)
-				{
-					motorinv = true;
-				}
-				else if(motorinv == true)
-				{
-					motorinv = false;
-				}
-				else
-				{
-					motorinv = motorinv;
-				}
-			}
 			
 			if(stick1.GetRawButton(7))
 			{
@@ -157,7 +139,7 @@ public:
 				sparky.EncReset();
 			}
 			
-			sparky.InvertMotors(motorinv);
+			sparky.InvertMotors(true);
 			if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
 			{
 				sparky.SparkTank();
@@ -193,6 +175,10 @@ public:
 			else
 			{
 				sparky.NoMoving();
+			}
+			if (stick1.GetRawButton(5) == true || stick2.GetRawButton(5))
+			{
+				sparky.ClimbTower();
 			}
 			blinkylight->Set(Relay::kForward);
 			Wait(0.005);				// Wait for a motor update time
