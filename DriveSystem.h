@@ -10,13 +10,16 @@ private:
 	Joystick stick1, stick2; // only joystick
 	Gyro gyro;
 	ADXL345_SPI adxl;
-	DigitalInput trigger;
 	Encoder enc;
 	Encoder enc2;
 	DriverStation *ds;
 	DriverStationLCD *dsLCD;
 	Encoder climbenc;
 	DigitalInput ls;
+	Servo reverse;
+	Victor arm1, arm2, dumparm, dumpbuck;
+	
+	
 
 	
 public:
@@ -28,7 +31,6 @@ public:
 	void Stop();
 	void Reset();
 	void GyroReset();
-	void ClimbTower();
 	void EncReset();
 	bool InvertMotors(bool tf);
 	bool Safety(bool tf);
@@ -40,6 +42,21 @@ public:
 	void SparkSecondArcade();
 	void NoMoving();
 	void PrintGyro();
+	void ArmOneVal(float value);
+	void ArmTwoVal(float value);
+	void ServoVal(float value);
+	void ArmOneDisable();
+	void ArmTwoDisable();
+	void DumperForward();
+	void DumperBackward();
+	void DumperArmForward();
+	void DumperArmBackward();
+	void DumperArm();
+	void NoDumper();
+	void SafetyDance();
+	void ForwardHighGear();
+	void ForwardLowGear();
+	void BackwardLowGear();
 };
 
 #endif

@@ -6,13 +6,17 @@ DriveSystem::DriveSystem():
 	stick2(2),
 	gyro(2),
 	adxl(1, 5, 6, 7, 8),
-	trigger(11),
 	enc(1, 2),
 	enc2(13, 14),
 	ds(DriverStation::GetInstance()),
 	dsLCD(DriverStationLCD::GetInstance()),
-	climbenc(10, 11), //BOGUS PORT NUMBERS
-	ls(4) //BOGUS PORT NUMBERS
+	climbenc(10, 11),
+	ls(4), //BOGUS PORT NUMBERS
+	reverse(5),
+	arm1(3),
+	arm2(4),
+	dumparm(6),
+	dumpbuck(7)
 {
 	myRobot.SetExpiration(0.1);
 	enc.Reset();
@@ -97,23 +101,6 @@ void DriveSystem::GyroReset()
 	gyro.Reset();
 }
 
-void DriveSystem::ClimbTower()
-{
-	Drive(1);
-	LTurn(45);
-	while(adxl.GetAccelerations().YAxis <= 68.0 && adxl.GetAccelerations().YAxis >= -68.0) 
-	{
-		myRobot.Drive(1.0, 0.0);
-	}
-	
-	GyroReset();
-	climbenc.Reset();
-	//turn on arm
-	if(ls.Get() == true)
-	{
-		//slow down arm
-	}
-}
 
 void DriveSystem::EncReset()
 {
@@ -158,9 +145,10 @@ void DriveSystem::Printlines()
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder 2: %i", enc2.Get());
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "X: %d", adxl.GetAcceleration(adxl.kAxis_X));
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Y: %d", adxl.GetAcceleration(adxl.kAxis_Y));
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Z: %d", adxl.GetAcceleration(adxl.kAxis_Z));
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Joy_Y: %f", stick2.GetY());
+	/*dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "X: %5.1d", adxl.GetAcceleration(adxl.kAxis_X));
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Y: %5.1d", adxl.GetAcceleration(adxl.kAxis_Y));
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Z: %5.1d", adxl.GetAcceleration(adxl.kAxis_Z));*/
 	dsLCD->UpdateLCD();
 }
 
@@ -181,10 +169,103 @@ void DriveSystem::SparkSecondArcade()
 
 void DriveSystem::NoMoving()
 {
-	myRobot.TankDrive(0.0, 0.0);
+	//myRobot.TankDrive(0.0, 0.0);
+	myRobot.ArcadeDrive(0.0, 0.0);
 }
 
 void DriveSystem::PrintGyro()
 {
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
 }
+
+void DriveSystem::ArmOneVal(float value)
+{
+	arm1.Set(value);
+}
+
+void DriveSystem::ArmTwoVal(float value)
+{
+	arm2.Set(value);
+}
+
+void DriveSystem::ServoVal(float value)
+{
+	reverse.SetAngle(value);
+}
+
+void DriveSystem::ArmOneDisable()
+{
+	arm1.Disable();
+}
+
+void DriveSystem::ArmTwoDisable()
+{
+	arm2.Disable();
+}
+void DriveSystem::DumperForward()
+{
+	dumpbuck.Set(-1.0);
+}
+void DriveSystem::DumperBackward()
+{
+	dumpbuck.Set(1.0);
+}
+
+void DriveSystem::DumperArm()
+{
+	dumparm.Set(stick2.GetY()); // Drift is around 0.007 in both directions
+}
+void DriveSystem::DumperArmForward()
+{
+	dumparm.Set(-1.0);
+}
+void DriveSystem::DumperArmBackward()
+{
+	dumparm.Set(0.5);
+}
+void DriveSystem::NoDumper()
+{
+	dumparm.Set(0.0);
+	dumpbuck.Set(0.0);
+}
+void DriveSystem::SafetyDance()
+{
+	if(climbenc.Get() >= 200)
+	{
+		reverse.SetAngle(170.0);
+		arm1.Set(0.0);
+	}
+	else if(climbenc.Get() >= 400)
+	{
+		reverse.SetAngle(170.0);
+		arm1.Set(0.3);
+	}
+}
+void DriveSystem::ForwardHighGear()
+{
+	reverse.SetAngle(0.0);
+	Wait(0.25);
+	arm1.Set(1.0);
+}
+void DriveSystem::ForwardLowGear()
+{
+	reverse.SetAngle(170.0);
+	Wait(0.25);
+	arm1.Set(1.0);
+}
+
+void DriveSystem::BackwardLowGear()
+{
+	/*
+	if(climbenc.Get() <= 400)
+	{
+		SafetyDance();
+	}
+	else
+	{
+	*/
+	reverse.SetAngle(170.0);
+	Wait(0.25);
+	//}
+	arm1.Set(-1.0);
+};

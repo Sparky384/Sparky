@@ -10,7 +10,7 @@
 class RobotDemo : public SimpleRobot
 {
 	Joystick stick1, stick2; // only joystick
-	Relay *blinkylight;
+	//Relay *blinkylight;
 	DriverStation *ds;
 	DriverStationLCD *dsLCD;
 	DriveSystem sparky;
@@ -24,7 +24,7 @@ public:
 		dsLCD(DriverStationLCD::GetInstance()),
 		sparky()
 	{
-		blinkylight = new Relay(1);
+		//blinkylight = new Relay(1);
 		compressor = new Compressor(2, 3); // CHANGE THESE PORTS
 		compressor->Start();
 	}
@@ -46,7 +46,7 @@ public:
 			{
 				sparky.Reset();
 				sparky.Drive(2300);
-				blinkylight->Set(Relay::kForward);
+				//blinkylight->Set(Relay::kForward);
 				sparky.Stop();
 			}
 			else if(ds->GetDigitalIn(2)) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
@@ -124,13 +124,14 @@ public:
 		sparky.Reset();
 		sparky.GyroSens();
 		sparky.Safety(true);
+		sparky.SafetyDance();
 		
 		while (true)
 		{
 			sparky.GyroFixAngles();
 			sparky.Printlines();
-			
-			if(stick1.GetRawButton(7))
+			sparky.DumperArm();
+			if(stick1.GetRawButton(8))
 			{
 				sparky.GyroReset();
 			}
@@ -140,47 +141,82 @@ public:
 			}
 			
 			sparky.InvertMotors(true);
-			if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == true))
-			{
-				sparky.SparkTank();
-			}
-			else if(stick1.GetTrigger() == true && (stick2.GetTrigger() == false))
+			if(stick1.GetTrigger() == true)
 			{
 				sparky.SparkFirstArcade();
-			}
-			else if(stick2.GetTrigger() == true && (stick1.GetTrigger() == false))
-			{
-				sparky.SparkSecondArcade();
-			}
-			else if(stick1.GetTrigger() == true && stick2.GetTrigger() == true && (stick1.GetRawButton(3) || stick2.GetRawButton(3)))
-			{
-				stick1.GetX()/2;
-				stick1.GetY()/2;
-				stick2.GetX()/2;
-				stick2.GetY()/2;
-				sparky.SparkTank();
-			}
-			else if((stick1.GetTrigger() == true) && (stick2.GetTrigger() == false) && (stick1.GetRawButton(3) == true))
-			{
-				stick1.GetX()/2;
-				stick1.GetY()/2;
-				sparky.SparkFirstArcade();
-			}
-			else if(stick1.GetTrigger() == false && stick2.GetTrigger() == true && stick2.GetRawButton(3) == true)
-			{
-				stick2.GetX()/2;
-				stick2.GetY()/2;
-				sparky.SparkSecondArcade();
 			}
 			else
 			{
 				sparky.NoMoving();
 			}
-			if (stick1.GetRawButton(5) == true || stick2.GetRawButton(5))
+			
+			if(stick2.GetRawButton(6))
 			{
-				sparky.ClimbTower();
+				sparky.ForwardLowGear();
 			}
-			blinkylight->Set(Relay::kForward);
+			else if(stick2.GetRawButton(7))
+			{
+				sparky.BackwardLowGear();
+			}
+			else if(stick2.GetRawButton(11))
+			{
+				sparky.ForwardHighGear();
+			}
+			/*else if(stick2.GetRawButton(11))
+			{
+				sparky.ServoVal(0.0);
+				sparky.ArmOneVal(-1.0);
+			}*/
+			else
+			{
+				sparky.ArmOneVal(0.0);
+			}
+			if(stick2.GetRawButton(3))
+			{
+				sparky.DumperForward();
+			}
+			else if(stick2.GetRawButton(2))
+			{
+				sparky.DumperBackward();
+			}
+			/*
+			else if(stick2.GetRawButton(8))
+			{
+				sparky.DumperArmForward();
+			}
+			else if(stick2.GetRawButton(9))
+			{
+				sparky.DumperArmBackward();
+			}
+			else
+			{
+				sparky.NoDumper();
+			}
+			
+			if(stick2.GetRawButton(8))
+			{
+				sparky.ServoVal(170.0);
+			}
+			else if(stick2.GetRawButton(9))
+			{
+				sparky.ServoVal(0.0);
+			}
+			if(stick2.GetRawButton(6))
+			{
+				//sparky.ServoVal(170.0);
+				sparky.ArmOneVal(1.0);
+			}
+			else if(stick2.GetRawButton(7))
+			{
+				//sparky.ServoVal(170.0);
+				sparky.ArmOneVal(-1.0);
+			}
+			else
+			{
+				sparky.ArmOneVal(0.0);
+			}*/
+			
+			//blinkylight->Set(Relay::kForward);
 			Wait(0.005);				// Wait for a motor update time
 		}
 	}
