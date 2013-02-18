@@ -53,10 +53,11 @@ public:
 	void DumperArmBackward();
 	void DumperArm();
 	void NoDumper();
-	void SafetyDance();
 	void ForwardHighGear();
 	void ForwardLowGear();
 	void BackwardLowGear();
+	void Dump();
+	void AutoForward();
 };
 
 #endif

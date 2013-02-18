@@ -145,10 +145,7 @@ void DriveSystem::Printlines()
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder 2: %i", enc2.Get());
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Joy_Y: %f", stick2.GetY());
-	/*dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "X: %5.1d", adxl.GetAcceleration(adxl.kAxis_X));
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Y: %5.1d", adxl.GetAcceleration(adxl.kAxis_Y));
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Z: %5.1d", adxl.GetAcceleration(adxl.kAxis_Z));*/
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Bucket: %f", dumpbuck.Get());
 	dsLCD->UpdateLCD();
 }
 
@@ -204,11 +201,11 @@ void DriveSystem::ArmTwoDisable()
 }
 void DriveSystem::DumperForward()
 {
-	dumpbuck.Set(-1.0);
+	dumpbuck.Set(-0.5);
 }
 void DriveSystem::DumperBackward()
 {
-	dumpbuck.Set(1.0);
+	dumpbuck.Set(0.5);
 }
 
 void DriveSystem::DumperArm()
@@ -221,51 +218,50 @@ void DriveSystem::DumperArmForward()
 }
 void DriveSystem::DumperArmBackward()
 {
-	dumparm.Set(0.5);
+	dumparm.Set(1.0);
 }
 void DriveSystem::NoDumper()
 {
 	dumparm.Set(0.0);
 	dumpbuck.Set(0.0);
 }
-void DriveSystem::SafetyDance()
-{
-	if(climbenc.Get() >= 200)
-	{
-		reverse.SetAngle(170.0);
-		arm1.Set(0.0);
-	}
-	else if(climbenc.Get() >= 400)
-	{
-		reverse.SetAngle(170.0);
-		arm1.Set(0.3);
-	}
-}
 void DriveSystem::ForwardHighGear()
 {
-	reverse.SetAngle(0.0);
-	Wait(0.25);
+	//reverse.SetAngle(0.0);
+	//Wait(0.25);
 	arm1.Set(1.0);
 }
 void DriveSystem::ForwardLowGear()
 {
-	reverse.SetAngle(170.0);
-	Wait(0.25);
+	//reverse.SetAngle(170.0);
+	//Wait(0.25);
 	arm1.Set(1.0);
 }
 
 void DriveSystem::BackwardLowGear()
 {
-	/*
-	if(climbenc.Get() <= 400)
-	{
-		SafetyDance();
-	}
-	else
-	{
-	*/
-	reverse.SetAngle(170.0);
-	Wait(0.25);
-	//}
 	arm1.Set(-1.0);
-};
+}
+void DriveSystem::Dump()
+{
+	dumpbuck.Set(-0.5);
+	Wait(1.0);
+	dumpbuck.Set(0.0);
+	Wait(0.1);
+	dumpbuck.Set(0.5);
+	Wait(1.0);
+	dumpbuck.Set(0.0);
+	Wait(0.1);
+}
+void DriveSystem::AutoForward()
+{
+	while(climbenc.Get() <= 400)
+	{
+		reverse.SetAngle(0.0);
+		Wait(0.25);
+		arm1.Set(1.0);
+		Wait(1.0);
+	}
+	arm1.Set(0.0);
+	Wait(0.1);
+}

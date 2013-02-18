@@ -48,6 +48,7 @@ public:
 				sparky.Drive(2300);
 				//blinkylight->Set(Relay::kForward);
 				sparky.Stop();
+				sparky.Dump();
 			}
 			else if(ds->GetDigitalIn(2)) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
 			{
@@ -56,6 +57,7 @@ public:
 				sparky.LTurn(35.0);
 				sparky.Drive(2377);
 				sparky.Stop();
+				sparky.Dump();
 			}
 			else if(ds->GetDigitalIn(3)) // QUADRANT 3 - DRIVE STRAIGHT, TURN 90 DEGREES, THEN IMPLEMENT INPUT 2
 			{
@@ -66,6 +68,7 @@ public:
 				sparky.LTurn(35.0);
 				sparky.Drive(2377);
 				sparky.Stop();
+				sparky.Dump();
 			}
 			else if(ds->GetDigitalIn(4)) //DRIVE STRAIGHT, THEN TURN 45 TO GOAL
 			{
@@ -74,6 +77,7 @@ public:
 				sparky.RTurn(45.0);
 				sparky.Drive(2300);
 				sparky.Stop();
+				sparky.Dump();
 			}
 			else if(ds->GetDigitalIn(5)) //DRIVE UNDER PYRAMID, TURN 90, THEN INPUT 2 CODE
 			{
@@ -84,6 +88,7 @@ public:
 				sparky.LTurn(35.0);
 				sparky.Drive(2300);
 				sparky.Stop();
+				sparky.Dump();
 			}
 			else if(ds->GetDigitalIn(6)) //TURN LEFT 90, DRIVE, THEN TURN LEFT 90, IMPLEMENT INPUT 4 CODE
 			{
@@ -95,6 +100,7 @@ public:
 				sparky.RTurn(45.0);
 				sparky.Drive(2300);
 				sparky.Stop();
+				sparky.Dump();
 			}
 			else if(ds->GetDigitalIn(7)) // SHORT STRAIGHT DRIVE, TURN 90, FORWARD, 45 TURN, DRIVE TO GOAL
 			{
@@ -104,6 +110,7 @@ public:
 				sparky.LTurn(35.0);
 				sparky.Drive(1610);
 				sparky.Stop();
+				sparky.Dump();
 			}
 			else
 			{
@@ -124,13 +131,12 @@ public:
 		sparky.Reset();
 		sparky.GyroSens();
 		sparky.Safety(true);
-		sparky.SafetyDance();
 		
 		while (true)
 		{
 			sparky.GyroFixAngles();
 			sparky.Printlines();
-			sparky.DumperArm();
+			//sparky.DumperArm();
 			if(stick1.GetRawButton(8))
 			{
 				sparky.GyroReset();
@@ -158,10 +164,6 @@ public:
 			{
 				sparky.BackwardLowGear();
 			}
-			else if(stick2.GetRawButton(11))
-			{
-				sparky.ForwardHighGear();
-			}
 			/*else if(stick2.GetRawButton(11))
 			{
 				sparky.ServoVal(0.0);
@@ -179,12 +181,24 @@ public:
 			{
 				sparky.DumperBackward();
 			}
-			/*
-			else if(stick2.GetRawButton(8))
+			else
+			{
+				sparky.NoDumper();
+			}
+			if(stick2.GetRawButton(8))
+			{
+				sparky.ServoVal(0.0);
+			}
+			else if(stick2.GetRawButton(9))
+			{
+				sparky.ServoVal(170.0);
+			}
+			
+			else if(stick2.GetRawButton(5))
 			{
 				sparky.DumperArmForward();
 			}
-			else if(stick2.GetRawButton(9))
+			else if(stick2.GetRawButton(4))
 			{
 				sparky.DumperArmBackward();
 			}
@@ -192,7 +206,7 @@ public:
 			{
 				sparky.NoDumper();
 			}
-			
+			/*
 			if(stick2.GetRawButton(8))
 			{
 				sparky.ServoVal(170.0);
