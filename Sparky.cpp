@@ -170,12 +170,13 @@ public:
 			
 			if(stick2.GetRawButton(8))
 			{
-				sparky.ServoVal(0.0);
+				sparky.ServoVal(0.0); // Shifting into high speed (?)
 			}
 			else if(stick2.GetRawButton(9))
 			{
-				sparky.ServoVal(170.0);
+				sparky.ServoVal(170.0); // Shifting into low speed (?)
 			}
+			
 			else if(stick2.GetRawButton(6))
 			{
 				sparky.ForwardLowGear();
