@@ -136,7 +136,11 @@ public:
 		{
 			sparky.GyroFixAngles();
 			sparky.Printlines();
-			//sparky.DumperArm();
+			if(stick2.GetTrigger() == true)
+			{
+				sparky.DumperArm();
+			}
+			else{}
 			if(stick1.GetRawButton(8))
 			{
 				sparky.GyroReset();
@@ -194,18 +198,6 @@ public:
 				sparky.ServoVal(170.0);
 			}
 			
-			else if(stick2.GetRawButton(5))
-			{
-				sparky.DumperArmForward();
-			}
-			else if(stick2.GetRawButton(4))
-			{
-				sparky.DumperArmBackward();
-			}
-			else
-			{
-				sparky.NoDumper();
-			}
 			/*
 			if(stick2.GetRawButton(8))
 			{
