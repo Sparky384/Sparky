@@ -136,11 +136,13 @@ public:
 		{
 			sparky.GyroFixAngles();
 			sparky.Printlines();
+			/*
 			if(stick2.GetTrigger() == true)
 			{
 				sparky.DumperArm();
 			}
 			else{}
+			*/
 			if(stick1.GetRawButton(8))
 			{
 				sparky.GyroReset();
@@ -160,35 +162,12 @@ public:
 				sparky.NoMoving();
 			}
 			
-			if(stick2.GetRawButton(6))
-			{
-				sparky.ForwardLowGear();
-			}
-			else if(stick2.GetRawButton(7))
-			{
-				sparky.BackwardLowGear();
-			}
 			/*else if(stick2.GetRawButton(11))
 			{
 				sparky.ServoVal(0.0);
 				sparky.ArmOneVal(-1.0);
 			}*/
-			else
-			{
-				sparky.ArmOneVal(0.0);
-			}
-			if(stick2.GetRawButton(3))
-			{
-				sparky.DumperForward();
-			}
-			else if(stick2.GetRawButton(2))
-			{
-				sparky.DumperBackward();
-			}
-			else
-			{
-				sparky.NoDumper();
-			}
+			
 			if(stick2.GetRawButton(8))
 			{
 				sparky.ServoVal(0.0);
@@ -197,7 +176,35 @@ public:
 			{
 				sparky.ServoVal(170.0);
 			}
-			
+			else if(stick2.GetRawButton(6))
+			{
+				sparky.ForwardLowGear();
+			}
+			else if(stick2.GetRawButton(7))
+			{
+				sparky.BackwardLowGear();
+			}
+			else if(stick2.GetRawButton(3))
+			{
+				sparky.DumperForward();
+			}
+			else if(stick2.GetRawButton(2))
+			{
+				sparky.DumperBackward();
+			}
+			else if(stick2.GetRawButton(5))
+			{
+				sparky.DumperArmForward();
+			}
+			else if(stick2.GetRawButton(4))
+			{
+				sparky.DumperArmBackward();
+			}
+			else
+			{
+				sparky.ArmOneVal(0.0);
+				sparky.NoDumper();
+			}
 			/*
 			if(stick2.GetRawButton(8))
 			{

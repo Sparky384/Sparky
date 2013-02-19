@@ -6,7 +6,7 @@
 class DriveSystem
 {
 private:
-	RobotDrive myRobot, dumperarm; // robot drive system
+	RobotDrive myRobot; // robot drive system
 	Joystick stick1, stick2; // only joystick
 	Gyro gyro;
 	ADXL345_SPI adxl;

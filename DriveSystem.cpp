@@ -2,7 +2,7 @@
 
 DriveSystem::DriveSystem():
 	myRobot(2, 1),	// these must be initialized in the same order
-	dumperarm(6, 9),
+	//dumperarm(6, 9),
 	stick1(1),		// as they are declared above.
 	stick2(2),
 	gyro(2),
@@ -146,7 +146,9 @@ void DriveSystem::Printlines()
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder 2: %i", enc2.Get());
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Y Val: %f", stick2.GetY());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "X: %f", adxl.GetAcceleration(adxl.kAxis_X));
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Y: %f", adxl.GetAcceleration(adxl.kAxis_Y));
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Z: %f", adxl.GetAcceleration(adxl.kAxis_Z));
 	dsLCD->UpdateLCD();
 }
 
@@ -211,7 +213,7 @@ void DriveSystem::DumperBackward()
 
 void DriveSystem::DumperArm()
 {
-	dumperarm.ArcadeDrive(stick2); // Drift is around 0.007 in both directions
+	//dumperarm.ArcadeDrive(stick2); // Drift is around 0.007 in both directions
 }
 void DriveSystem::DumperArmForward()
 {
