@@ -17,7 +17,7 @@ private:
 	Encoder climbenc;
 	DigitalInput ls;
 	Servo reverse;
-	Victor arm1, arm2, dumparm, dumpbuck;
+	Victor arm1, dumparm, dumpbuck;
 	
 	
 
@@ -54,8 +54,9 @@ public:
 	void DumperArm();
 	void NoDumper();
 	void ForwardHighGear();
-	void ForwardLowGear();
-	void BackwardLowGear();
+	void ForwardGrappler();
+	void BackwardGrappler();
+	void NoGrappler();
 	void Dump();
 	void AutoForward();
 };

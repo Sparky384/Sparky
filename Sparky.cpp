@@ -25,7 +25,7 @@ public:
 		sparky()
 	{
 		//blinkylight = new Relay(1);
-		compressor = new Compressor(2, 3); // CHANGE THESE PORTS
+		compressor = new Compressor(14, 7);
 		compressor->Start();
 	}
 
@@ -127,13 +127,13 @@ public:
 	 */
 	void OperatorControl(void)
 	{
-		
 		sparky.Reset();
 		sparky.GyroSens();
 		sparky.Safety(true);
 		
 		while (true)
 		{
+			//compressor->Start();
 			sparky.GyroFixAngles();
 			sparky.Printlines();
 			/*
@@ -176,16 +176,19 @@ public:
 			{
 				sparky.ServoVal(170.0); // Shifting into low speed (?)
 			}
-			
-			else if(stick2.GetRawButton(6))
+			if(stick2.GetRawButton(6))
 			{
-				sparky.ForwardLowGear();
+				sparky.ForwardGrappler();
 			}
 			else if(stick2.GetRawButton(7))
 			{
-				sparky.BackwardLowGear();
+				sparky.BackwardGrappler();
 			}
-			else if(stick2.GetRawButton(3))
+			else
+			{
+				sparky.NoGrappler();
+			}
+			if(stick2.GetRawButton(3))
 			{
 				sparky.DumperForward();
 			}
@@ -203,7 +206,6 @@ public:
 			}
 			else
 			{
-				sparky.ArmOneVal(0.0);
 				sparky.NoDumper();
 			}
 			/*

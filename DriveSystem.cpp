@@ -1,23 +1,22 @@
 #include "DriveSystem.h"
 
 DriveSystem::DriveSystem():
-	myRobot(2, 1),	// these must be initialized in the same order
-	//dumperarm(6, 9),
-	stick1(1),		// as they are declared above.
+	myRobot(1, 7, 2, 8), //prototype: (2, 1)			| final: (1, 7, 2, 8)
+	stick1(1),
 	stick2(2),
-	gyro(2),
-	adxl(1, 5, 6, 7, 8),
-	enc(1, 2),
-	enc2(13, 14),
+	gyro(2), 			 //prototype: (2)				| final:
+	adxl(1, 5, 6, 7, 8), //prototype: (1, 5, 6, 7, 8)	| final:
+	enc(1, 2),			 //prototype: (1, 2)			| final: (1, 2)?
+	enc2(13, 14),		 //prototype: (13, 14)			| final: (13, 14)?
 	ds(DriverStation::GetInstance()),
 	dsLCD(DriverStationLCD::GetInstance()),
-	climbenc(10, 11),
+	climbenc(10, 11),    //prototype: (10, 11)			| final:
 	ls(4), //BOGUS PORT NUMBERS
-	reverse(5),
-	arm1(3),
-	arm2(4),
-	dumparm(6),
-	dumpbuck(7)
+	reverse(5),			 //prototype: (5)				| final:
+	arm1(10),			 //prototype: (3)				| final: (10)
+	//arm2(4),			 //prototype: (4)				| final:
+	dumparm(3),			 //prototype: (6)				| final: (3)
+	dumpbuck(4)			 //prototype: (7)				| final: (4)
 {
 	myRobot.SetExpiration(0.1);
 	enc.Reset();
@@ -113,6 +112,8 @@ bool DriveSystem::InvertMotors(bool tf)
 {
 	myRobot.SetInvertedMotor(myRobot.kRearRightMotor, tf);
 	myRobot.SetInvertedMotor(myRobot.kRearLeftMotor, tf);
+	myRobot.SetInvertedMotor(myRobot.kFrontLeftMotor, tf);
+	myRobot.SetInvertedMotor(myRobot.kFrontRightMotor, tf);
 	return tf;
 }
 
@@ -144,8 +145,8 @@ void DriveSystem::Printlines()
 {
 	float angle = gyro.GetAngle();
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder 2: %i", enc2.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get(), "Encoder2: %i", enc2.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "ClimbEncoder: %i", climbenc.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "X: %f", adxl.GetAcceleration(adxl.kAxis_X));
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Y: %f", adxl.GetAcceleration(adxl.kAxis_Y));
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Z: %f", adxl.GetAcceleration(adxl.kAxis_Z));
@@ -185,7 +186,7 @@ void DriveSystem::ArmOneVal(float value)
 
 void DriveSystem::ArmTwoVal(float value)
 {
-	arm2.Set(value);
+	//arm2.Set(value);
 }
 
 void DriveSystem::ServoVal(float value)
@@ -200,15 +201,15 @@ void DriveSystem::ArmOneDisable()
 
 void DriveSystem::ArmTwoDisable()
 {
-	arm2.Disable();
+	//arm2.Disable();
 }
 void DriveSystem::DumperForward()
 {
-	dumpbuck.Set(-0.5);
+	dumpbuck.Set(-0.5); // prototype and final forward is the same
 }
 void DriveSystem::DumperBackward()
 {
-	dumpbuck.Set(0.5);
+	dumpbuck.Set(0.5); // prototype and final backward is the same
 }
 
 void DriveSystem::DumperArm()
@@ -217,11 +218,11 @@ void DriveSystem::DumperArm()
 }
 void DriveSystem::DumperArmForward()
 {
-	dumparm.Set(-1.0);
+	dumparm.Set(1.0); // prototope forward: (-1.0) | final forward: (1.0)
 }
 void DriveSystem::DumperArmBackward()
 {
-	dumparm.Set(1.0);
+	dumparm.Set(-1.0); // prototype backward: (1.0) | final backward: (-1.0)
 }
 void DriveSystem::NoDumper()
 {
@@ -234,27 +235,34 @@ void DriveSystem::ForwardHighGear()
 	//Wait(0.25);
 	arm1.Set(1.0);
 }
-void DriveSystem::ForwardLowGear()
+void DriveSystem::ForwardGrappler()
 {
 	//reverse.SetAngle(170.0);
 	//Wait(0.25);
 	arm1.Set(1.0);
 }
 
-void DriveSystem::BackwardLowGear()
+void DriveSystem::BackwardGrappler()
 {
 	arm1.Set(-1.0);
+}
+
+void DriveSystem::NoGrappler()
+{
+	arm1.Set(0.0);
 }
 void DriveSystem::Dump()
 {
 	dumpbuck.Set(-0.5);
 	Wait(1.0);
 	dumpbuck.Set(0.0);
-	Wait(0.1);
+	Wait(1.0);
 	dumpbuck.Set(0.5);
 	Wait(1.0);
 	dumpbuck.Set(0.0);
 	Wait(0.1);
+	RTurn(55.0);
+	Drive(2300);
 }
 void DriveSystem::AutoForward()
 {
