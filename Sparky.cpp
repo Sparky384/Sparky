@@ -25,8 +25,8 @@ public:
 		sparky()
 	{
 		//blinkylight = new Relay(1);
-		compressor = new Compressor(14, 7);
-		compressor->Start();
+		compressor = new Compressor(8, 8);
+		//compressor->Start();
 	}
 
 	/**
@@ -130,12 +130,12 @@ public:
 		sparky.Reset();
 		sparky.GyroSens();
 		sparky.Safety(true);
-		
 		while (true)
 		{
-			//compressor->Start();
 			sparky.GyroFixAngles();
 			sparky.Printlines();
+			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Comp: %i", compressor->GetPressureSwitchValue());
+			dsLCD->UpdateLCD(); // compressor is constantly showing 0. Mechanical/Programming?
 			/*
 			if(stick2.GetTrigger() == true)
 			{
@@ -143,6 +143,14 @@ public:
 			}
 			else{}
 			*/
+			if(!compressor->GetPressureSwitchValue()) // only runs until 120 PSI
+			{
+				compressor->Start();
+			}
+			else
+			{
+				compressor->Stop();
+			}
 			if(stick1.GetRawButton(8))
 			{
 				sparky.GyroReset();
