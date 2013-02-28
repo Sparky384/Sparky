@@ -18,6 +18,7 @@ private:
 	DigitalInput ls;
 	Servo reverse;
 	Victor arm1, dumparm, dumpbuck;
+	Solenoid basehook, pogo;
 	
 	
 
@@ -53,12 +54,12 @@ public:
 	void DumperArmBackward();
 	void DumperArm();
 	void NoDumper();
-	void ForwardHighGear();
 	void ForwardGrappler();
 	void BackwardGrappler();
 	void NoGrappler();
 	void Dump();
 	void AutoForward();
+	void ClimbSequence();
 };
 
 #endif

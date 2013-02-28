@@ -1,7 +1,7 @@
 #include "DriveSystem.h"
 
 DriveSystem::DriveSystem():
-	myRobot(1, 7, 2, 8), //prototype: (2, 1)			| final: (1, 7, 2, 8)
+	myRobot(9, 7, 8, 6), //prototype: (2, 1)			| final: (1, 7, 2, 8)
 	stick1(1),
 	stick2(2),
 	gyro(2), 			 //prototype: (2)				| final:
@@ -10,13 +10,15 @@ DriveSystem::DriveSystem():
 	enc2(13, 14),		 //prototype: (13, 14)			| final: (13, 14)?
 	ds(DriverStation::GetInstance()),
 	dsLCD(DriverStationLCD::GetInstance()),
-	climbenc(10, 11),    //prototype: (10, 11)			| final:
+	climbenc(10, 4),    //prototype: (10, 11)			| final:			***PORT 11 IS BENT, THATS WHY IT IS PORT 4***
 	ls(4), //BOGUS PORT NUMBERS
 	reverse(5),			 //prototype: (5)				| final:
 	arm1(10),			 //prototype: (3)				| final: (10)
 	//arm2(4),			 //prototype: (4)				| final:
 	dumparm(3),			 //prototype: (6)				| final: (3)
-	dumpbuck(4)			 //prototype: (7)				| final: (4)
+	dumpbuck(4),		//prototype: (7)				| final: (4)
+	basehook(41),
+	pogo(6)
 {
 	myRobot.SetExpiration(0.1);
 	enc.Reset();
@@ -39,13 +41,16 @@ bool DriveSystem::EncDriveLimit(int length)
 
 void DriveSystem::Drive(int distance)
 {
+	/*
 	while(EncDriveLimit(distance))
 	{
 		dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", (enc.Get() + enc.Get())/2);
 		dsLCD->UpdateLCD();
 		myRobot.Drive(-1.0, 0.0);
 		
-	}
+	}*/
+	myRobot.Drive(-0.5, 0.0);
+	Wait(5.0);
 	enc.Reset();
 	enc2.Reset();
 	gyro.Reset();
@@ -170,7 +175,7 @@ void DriveSystem::SparkSecondArcade()
 
 void DriveSystem::NoMoving()
 {
-	//myRobot.TankDrive(0.0, 0.0);
+	myRobot.TankDrive(0.0, 0.0);
 	myRobot.ArcadeDrive(0.0, 0.0);
 }
 
@@ -229,12 +234,7 @@ void DriveSystem::NoDumper()
 	dumparm.Set(0.0);
 	dumpbuck.Set(0.0);
 }
-void DriveSystem::ForwardHighGear()
-{
-	//reverse.SetAngle(0.0);
-	//Wait(0.25);
-	arm1.Set(1.0);
-}
+
 void DriveSystem::ForwardGrappler()
 {
 	//reverse.SetAngle(170.0);
@@ -275,4 +275,67 @@ void DriveSystem::AutoForward()
 	}
 	arm1.Set(0.0);
 	Wait(0.1);
+}
+
+void DriveSystem::ClimbSequence()
+{
+	if(ls.Get() == 1)
+	{
+		if(stick2.GetRawButton(10))
+		{
+			climbenc.Reset();
+			reverse.Set(0.0);
+			Wait(0.05);
+			arm1.Set(1.0);
+			while(climbenc.Get() < 70)
+			{
+				arm1.Set(1.0);
+			}
+			Wait(0.05);
+			arm1.Set(0.0);
+			Wait(0.05);
+			reverse.Set(170.0); // theoretically low gear
+			arm1.Set(-1.0);
+			while(climbenc.Get() > 0)
+			{
+				arm1.Set(-1.0);
+			}
+			arm1.Set(0.0);
+			Wait(0.05);
+			basehook.Set(true);
+			Wait(0.5);
+			reverse.Set(0.0); //shifting into high gear
+			Wait(0.05);
+			arm1.Set(1.0);
+			while(climbenc.Get() < 200)
+			{
+				arm1.Set(1.0);
+			}
+			arm1.Set(0.0);
+			Wait(0.05);
+			reverse.Set(170.0); // shifting into low gear
+			Wait(0.5);
+			arm1.Set(-1.0);
+			Wait(0.5);
+			basehook.Set(false);
+			while(climbenc.Get() > 0) // MAKE SURE TO INPUT POGO CODE. TEST IN TELEOP FIRST!!!!
+			{
+				arm1.Set(-1.0);
+			}
+			arm1.Set(0.0);
+			Wait(0.05);
+			basehook.Set(true);
+			Wait(0.05);
+			reverse.Set(0.0); // shifting into high gear
+			Wait(0.5);
+			arm1.Set(1.0);
+			while(climbenc.Get() < 200)
+			{
+				arm1.Set(1.0);
+			}
+			arm1.Set(0.0);
+			Wait(0.05);
+			basehook.Set(true);
+		}
+	}
 }

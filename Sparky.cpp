@@ -44,11 +44,14 @@ public:
 			sparky.GyroReset();
 			if(ds->GetDigitalIn(1)) //QUADRANT 1 - DRIVE STRAIGHT
 			{
+				sparky.Drive(5);
+				/* commenting this part out because testing something else temporarily to test
+				 * straight drive
 				sparky.Reset();
 				sparky.Drive(2300);
-				//blinkylight->Set(Relay::kForward);
 				sparky.Stop();
 				sparky.Dump();
+				*/
 			}
 			else if(ds->GetDigitalIn(2)) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
 			{
@@ -161,7 +164,11 @@ public:
 			}
 			
 			sparky.InvertMotors(true);
-			if(stick1.GetTrigger() == true)
+			if(stick1.GetTrigger() == true && stick2.GetTrigger() == true)
+			{
+				sparky.SparkTank();
+			}
+			else if(stick1.GetTrigger() == true)
 			{
 				sparky.SparkFirstArcade();
 			}
