@@ -25,8 +25,8 @@ public:
 		sparky()
 	{
 		//blinkylight = new Relay(1);
-		compressor = new Compressor(8, 8);
-		//compressor->Start();
+		compressor = new Compressor(8, 8); // final: (8,8)
+		compressor->Start();
 	}
 
 	/**
@@ -135,6 +135,7 @@ public:
 		sparky.Safety(true);
 		while (true)
 		{
+			sparky.ClimbSequence();
 			sparky.GyroFixAngles();
 			sparky.Printlines();
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Comp: %i", compressor->GetPressureSwitchValue());
@@ -146,6 +147,7 @@ public:
 			}
 			else{}
 			*/
+			/*
 			if(!compressor->GetPressureSwitchValue()) // only runs until 120 PSI
 			{
 				compressor->Start();
@@ -154,6 +156,7 @@ public:
 			{
 				compressor->Stop();
 			}
+			*/
 			if(stick1.GetRawButton(8))
 			{
 				sparky.GyroReset();

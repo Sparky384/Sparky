@@ -151,10 +151,7 @@ void DriveSystem::Printlines()
 	float angle = gyro.GetAngle();
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get(), "Encoder2: %i", enc2.Get());
-	//dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "ClimbEncoder: %i", climbenc.Get());
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "X: %f", adxl.GetAcceleration(adxl.kAxis_X));
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Y: %f", adxl.GetAcceleration(adxl.kAxis_Y));
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Z: %f", adxl.GetAcceleration(adxl.kAxis_Z));
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "ClimbEncoder: %i", climbenc.Get());
 	dsLCD->UpdateLCD();
 }
 
