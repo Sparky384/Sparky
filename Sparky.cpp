@@ -25,7 +25,7 @@ public:
 		sparky()
 	{
 		//blinkylight = new Relay(1);
-		compressor = new Compressor(8, 8); // final: (8,8)
+		compressor = new Compressor(9, 5); // final: (8,8) DIGITAL SIDECAR PORT 8 IS BAD!!!!
 		compressor->Start();
 	}
 
@@ -38,6 +38,7 @@ public:
 		sparky.Safety(false);
 		sparky.GyroReset();
 		sparky.GyroSens();
+		sparky.EncReset();
 		while(IsAutonomous() && IsEnabled()) // this is a change
 		{
 			sparky.InvertMotors(true);
@@ -135,10 +136,9 @@ public:
 		sparky.Safety(true);
 		while (true)
 		{
-			sparky.ClimbSequence();
+			//sparky.ClimbSequence();
 			sparky.GyroFixAngles();
 			sparky.Printlines();
-			dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Comp: %i", compressor->GetPressureSwitchValue());
 			dsLCD->UpdateLCD(); // compressor is constantly showing 0. Mechanical/Programming?
 			/*
 			if(stick2.GetTrigger() == true)
@@ -226,30 +226,15 @@ public:
 			{
 				sparky.NoDumper();
 			}
-			/*
-			if(stick2.GetRawButton(8))
+			if(stick1.GetRawButton(3))
 			{
-				sparky.ServoVal(170.0);
+				sparky.Basehook(true);
 			}
-			else if(stick2.GetRawButton(9))
+			else if(stick1.GetRawButton(2))
 			{
-				sparky.ServoVal(0.0);
+				sparky.Basehook(false);
 			}
-			if(stick2.GetRawButton(6))
-			{
-				//sparky.ServoVal(170.0);
-				sparky.ArmOneVal(1.0);
-			}
-			else if(stick2.GetRawButton(7))
-			{
-				//sparky.ServoVal(170.0);
-				sparky.ArmOneVal(-1.0);
-			}
-			else
-			{
-				sparky.ArmOneVal(0.0);
-			}*/
-			
+			else{}
 			//blinkylight->Set(Relay::kForward);
 			Wait(0.005);				// Wait for a motor update time
 		}

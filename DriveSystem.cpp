@@ -1,22 +1,22 @@
 #include "DriveSystem.h"
 
 DriveSystem::DriveSystem():
-	myRobot(9, 7, 8, 6), //prototype: (2, 1)			| final: (1, 7, 2, 8)
+	myRobot(9, 7, 8, 6),	//prototype: (2, 1)			| final: (1, 7, 2, 8)
 	stick1(1),
 	stick2(2),
-	gyro(2), 			 //prototype: (2)				| final:
-	adxl(1, 5, 6, 7, 8), //prototype: (1, 5, 6, 7, 8)	| final:
-	enc(1, 2),			 //prototype: (1, 2)			| final: (1, 2)?
-	enc2(13, 14),		 //prototype: (13, 14)			| final: (13, 14)?
+	gyro(2),				//prototype: (2)			| final:
+	//adxl(1, 5, 6, 7, 8),	//prototype: (1, 5, 6, 7, 8)| final:
+	enc(1, 2),				//prototype: (1, 2)			| final: (1, 2)?
+	enc2(13, 14),			//prototype: (13, 14)		| final: (13, 14)?
 	ds(DriverStation::GetInstance()),
 	dsLCD(DriverStationLCD::GetInstance()),
-	climbenc(10, 4),    //prototype: (10, 11)			| final:			***PORT 11 IS BENT, THATS WHY IT IS PORT 4***
-	ls(4), //BOGUS PORT NUMBERS
-	reverse(5),			 //prototype: (5)				| final:
-	arm1(10),			 //prototype: (3)				| final: (10)
-	//arm2(4),			 //prototype: (4)				| final:
-	dumparm(3),			 //prototype: (6)				| final: (3)
-	dumpbuck(4),		//prototype: (7)				| final: (4)
+	climbenc(3, 4),			//prototype: (3, 4)			| final:			***PORT 11 IS BENT, THATS WHY IT IS PORT 4***
+	ls(10),					//BOGUS PORT NUMBERS
+	reverse(5),				//prototype: (5)			| final:
+	arm1(10),				//prototype: (3)			| final: (10)
+	//arm2(4),				//prototype: (4)			| final:
+	dumparm(3),				//prototype: (6)			| final: (3)
+	dumpbuck(4),			//prototype: (7)			| final: (4)
 	basehook(41),
 	pogo(6)
 {
@@ -25,6 +25,8 @@ DriveSystem::DriveSystem():
 	enc2.Reset();
 	enc.Start();
 	enc2.Start();
+	climbenc.Reset();
+	climbenc.Start();
 }
 
 bool DriveSystem::EncDriveLimit(int length)
@@ -98,6 +100,7 @@ void DriveSystem::Reset()
 {
 	enc.Reset();
 	enc2.Reset();
+	climbenc.Reset();
 	gyro.Reset();
 }
 
@@ -111,6 +114,7 @@ void DriveSystem::EncReset()
 {
 	enc.Reset();
 	enc2.Reset();
+	climbenc.Reset();
 }
 
 bool DriveSystem::InvertMotors(bool tf)
@@ -150,8 +154,9 @@ void DriveSystem::Printlines()
 {
 	float angle = gyro.GetAngle();
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get(), "Encoder2: %i", enc2.Get());
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "ClimbEncoder: %i", climbenc.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "ClimbEnc: %i", climbenc.Get());
 	dsLCD->UpdateLCD();
 }
 
@@ -335,4 +340,9 @@ void DriveSystem::ClimbSequence()
 			basehook.Set(true);
 		}
 	}
+}
+
+void DriveSystem::Basehook(bool tf)
+{
+	basehook.Set(tf);
 }

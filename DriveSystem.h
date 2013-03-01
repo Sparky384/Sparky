@@ -9,7 +9,7 @@ private:
 	RobotDrive myRobot; // robot drive system
 	Joystick stick1, stick2; // only joystick
 	Gyro gyro;
-	ADXL345_SPI adxl;
+	//ADXL345_SPI adxl;
 	Encoder enc;
 	Encoder enc2;
 	DriverStation *ds;
@@ -60,6 +60,7 @@ public:
 	void Dump();
 	void AutoForward();
 	void ClimbSequence();
+	void Basehook(bool tf);
 };
 
 #endif
