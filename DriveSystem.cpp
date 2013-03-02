@@ -29,9 +29,9 @@ DriveSystem::DriveSystem():
 	climbenc.Start();
 }
 
-bool DriveSystem::EncDriveLimit(int length)
+bool DriveSystem::EncDriveLimit(int distance)
 {
-	if (abs((enc.Get() + enc2.Get())/2) <= length)
+	if (abs((enc.Get() + enc2.Get())/2) <= distance)
 	{
 		return true;
 	}
@@ -43,21 +43,11 @@ bool DriveSystem::EncDriveLimit(int length)
 
 void DriveSystem::Drive(int distance)
 {
-	/*
-	while(EncDriveLimit(distance))
+	while(EncDriveLimit(distance) == true)
 	{
-		dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder Value: %i", (enc.Get() + enc.Get())/2);
-		dsLCD->UpdateLCD();
-		myRobot.Drive(-1.0, 0.0);
-		
-	}*/
-	myRobot.Drive(-0.5, 0.0);
-	Wait(5.0);
-	enc.Reset();
-	enc2.Reset();
-	gyro.Reset();
-	myRobot.Drive(0.0, 0.0);
-	Wait(1.0);
+		myRobot.Drive(-0.3, 0.0);
+	}
+	Wait(0.05);
 }
 
 void DriveSystem::RTurn(double angle)
@@ -93,7 +83,6 @@ void DriveSystem::LTurn(double angle)
 void DriveSystem::Stop()
 {
 	myRobot.Drive(0.0, 0.0);
-	Wait(15.0);
 }
 
 void DriveSystem::Reset()
@@ -225,11 +214,11 @@ void DriveSystem::DumperArm()
 }
 void DriveSystem::DumperArmForward()
 {
-	dumparm.Set(1.0); // prototope forward: (-1.0) | final forward: (1.0)
+	dumparm.Set(1.0);
 }
 void DriveSystem::DumperArmBackward()
 {
-	dumparm.Set(-1.0); // prototype backward: (1.0) | final backward: (-1.0)
+	dumparm.Set(-1.0);
 }
 void DriveSystem::NoDumper()
 {
@@ -255,16 +244,21 @@ void DriveSystem::NoGrappler()
 }
 void DriveSystem::Dump()
 {
+	dumparm.Set(1.0);
+	Wait(0.2);
+	dumparm.Set(0.0);
+	Wait(0.5);
 	dumpbuck.Set(-0.5);
-	Wait(1.0);
+	Wait(0.5);
 	dumpbuck.Set(0.0);
-	Wait(1.0);
+	Wait(3.0);
 	dumpbuck.Set(0.5);
 	Wait(1.0);
 	dumpbuck.Set(0.0);
-	Wait(0.1);
+	/*Wait(0.1); // "Getting out of the way" so other robots can score
 	RTurn(55.0);
-	Drive(2300);
+	Drive(2300);*/
+	Wait(15.0);
 }
 void DriveSystem::AutoForward()
 {

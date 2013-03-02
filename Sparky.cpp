@@ -36,23 +36,18 @@ public:
 	void Autonomous(void)
 	{
 		sparky.Safety(false);
-		sparky.GyroReset();
+		sparky.Reset();
 		sparky.GyroSens();
-		sparky.EncReset();
 		while(IsAutonomous() && IsEnabled()) // this is a change
 		{
 			sparky.InvertMotors(true);
-			sparky.GyroReset();
 			if(ds->GetDigitalIn(1)) //QUADRANT 1 - DRIVE STRAIGHT
 			{
-				sparky.Drive(5);
-				/* commenting this part out because testing something else temporarily to test
-				 * straight drive
-				sparky.Reset();
+				sparky.Printlines();
 				sparky.Drive(2300);
 				sparky.Stop();
-				sparky.Dump();
-				*/
+				//sparky.Dump();
+				Wait(15.0);
 			}
 			else if(ds->GetDigitalIn(2)) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
 			{

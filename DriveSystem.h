@@ -18,7 +18,7 @@ private:
 	DigitalInput ls;
 	Servo reverse;
 	Victor arm1, dumparm, dumpbuck;
-	Solenoid basehook, pogo;
+	Solenoid basehook, pogo; // ***PROTOTYPE IS RELAY WHILE FINAL IS SOLENOIDS***
 	
 	
 
