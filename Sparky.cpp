@@ -44,23 +44,24 @@ public:
 			if(ds->GetDigitalIn(1)) //QUADRANT 1 - DRIVE STRAIGHT
 			{
 				sparky.Printlines();
-				sparky.Drive(2300);
-				sparky.Stop();
-				//sparky.Dump();
+				sparky.Drive(1200); // 1 foot equals 230 encoder counts
+				sparky.Stop();		// this autonomous is complete!
+				sparky.Dump();
 				Wait(15.0);
 			}
 			else if(ds->GetDigitalIn(2)) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
 			{
-				sparky.Reset();
-				sparky.Drive(1572);
-				sparky.LTurn(35.0);
-				sparky.Drive(2377);
+				sparky.Printlines();	// this autonomous is complete!
+				sparky.Drive(900);
+				sparky.Stop();
+				sparky.LTurn(38.0);
+				sparky.Drive(1200);
 				sparky.Stop();
 				sparky.Dump();
+				Wait(15.0);
 			}
 			else if(ds->GetDigitalIn(3)) // QUADRANT 3 - DRIVE STRAIGHT, TURN 90 DEGREES, THEN IMPLEMENT INPUT 2
 			{
-				sparky.Reset();
 				sparky.Drive(2377);
 				sparky.RTurn(90.0);
 				sparky.Drive(1572);
@@ -119,7 +120,7 @@ public:
 			sparky.Stop();
 		}
 		sparky.Stop();
-	}
+	} // End autonomous Block
 
 	/**
 	 * Runs the motors with arcade steering. 
@@ -134,7 +135,6 @@ public:
 			//sparky.ClimbSequence();
 			sparky.GyroFixAngles();
 			sparky.Printlines();
-			dsLCD->UpdateLCD(); // compressor is constantly showing 0. Mechanical/Programming?
 			/*
 			if(stick2.GetTrigger() == true)
 			{
@@ -189,6 +189,8 @@ public:
 			{
 				sparky.ServoVal(170.0); // Shifting into low speed (?)
 			}
+			
+			
 			if(stick2.GetRawButton(6))
 			{
 				sparky.ForwardGrappler();
@@ -201,6 +203,8 @@ public:
 			{
 				sparky.NoGrappler();
 			}
+			
+			
 			if(stick2.GetRawButton(3))
 			{
 				sparky.DumperForward();
@@ -209,11 +213,11 @@ public:
 			{
 				sparky.DumperBackward();
 			}
-			else if(stick2.GetRawButton(5))
+			else if(stick2.GetRawButton(4))
 			{
 				sparky.DumperArmForward();
 			}
-			else if(stick2.GetRawButton(4))
+			else if(stick2.GetRawButton(5))
 			{
 				sparky.DumperArmBackward();
 			}
@@ -221,13 +225,14 @@ public:
 			{
 				sparky.NoDumper();
 			}
+
 			if(stick1.GetRawButton(3))
 			{
-				sparky.Basehook(true);
+				sparky.PogoForward();
 			}
 			else if(stick1.GetRawButton(2))
 			{
-				sparky.Basehook(false);
+				sparky.PogoBackward();
 			}
 			else{}
 			//blinkylight->Set(Relay::kForward);

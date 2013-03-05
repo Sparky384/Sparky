@@ -18,7 +18,9 @@ private:
 	DigitalInput ls;
 	Servo reverse;
 	Victor arm1, dumparm, dumpbuck;
-	Solenoid basehook, pogo; // ***PROTOTYPE IS RELAY WHILE FINAL IS SOLENOIDS***
+	Solenoid basehook;
+	Relay *pogoforward; // ***PROTOTYPE IS RELAY WHILE FINAL IS SOLENOIDS***
+	Relay *pogobackward;
 	
 	
 
@@ -61,6 +63,8 @@ public:
 	void AutoForward();
 	void ClimbSequence();
 	void Basehook(bool tf);
+	void PogoForward();
+	void PogoBackward();
 };
 
 #endif

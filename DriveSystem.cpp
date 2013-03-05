@@ -13,14 +13,15 @@ DriveSystem::DriveSystem():
 	climbenc(3, 4),			//prototype: (3, 4)			| final:			***PORT 11 IS BENT, THATS WHY IT IS PORT 4***
 	ls(10),					//BOGUS PORT NUMBERS
 	reverse(5),				//prototype: (5)			| final:
-	arm1(10),				//prototype: (3)			| final: (10)
+	arm1(10),				//prototype: (10)			| final: (10)
 	//arm2(4),				//prototype: (4)			| final:
-	dumparm(3),				//prototype: (6)			| final: (3)
-	dumpbuck(4),			//prototype: (7)			| final: (4)
-	basehook(41),
-	pogo(6)
+	dumparm(3),				//prototype: (3)			| final: (3)
+	dumpbuck(4),			//prototype: (4)			| final: (4)
+	basehook(41)			//prototype: ( )			| final:
 {
 	myRobot.SetExpiration(0.1);
+	pogoforward = new Relay(8, 1);
+	pogobackward = new Relay(8, 2); // on the final IT NEEDS TO GO INTO MODULE 3
 	enc.Reset();
 	enc2.Reset();
 	enc.Start();
@@ -43,10 +44,10 @@ bool DriveSystem::EncDriveLimit(int distance)
 
 void DriveSystem::Drive(int distance)
 {
-	while(EncDriveLimit(distance) == true)
+	while(EncDriveLimit(distance))
 	{
-		myRobot.Drive(-0.3, 0.0);
-	}
+		myRobot.Drive(-0.45, 0.0); 	// prototype put a negative to go forward (-0.45)
+	}								// on the final don't put a negative to go forward
 	Wait(0.05);
 }
 
@@ -56,7 +57,7 @@ void DriveSystem::RTurn(double angle)
 	{
 		dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
 		dsLCD->UpdateLCD();
-		myRobot.Drive(0.3, -1.0);
+		myRobot.Drive(-0.15, 1.0);
 	}
 	enc.Reset();
 	enc2.Reset();
@@ -69,9 +70,10 @@ void DriveSystem::LTurn(double angle)
 {
 	while(gyro.GetAngle() <= angle && gyro.GetAngle() >= -angle)
 	{
-		dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
+		dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
+		dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder 2: %i", enc2.Get());
 		dsLCD->UpdateLCD();
-		myRobot.Drive(0.3, 1.0);
+		myRobot.Drive(-0.15, -1.0);
 	}
 	enc.Reset();
 	enc2.Reset();
@@ -82,6 +84,7 @@ void DriveSystem::LTurn(double angle)
 
 void DriveSystem::Stop()
 {
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
 	myRobot.Drive(0.0, 0.0);
 }
 
@@ -214,11 +217,11 @@ void DriveSystem::DumperArm()
 }
 void DriveSystem::DumperArmForward()
 {
-	dumparm.Set(1.0);
+	dumparm.Set(-0.85);
 }
 void DriveSystem::DumperArmBackward()
 {
-	dumparm.Set(-1.0);
+	dumparm.Set(0.66);
 }
 void DriveSystem::NoDumper()
 {
@@ -244,21 +247,20 @@ void DriveSystem::NoGrappler()
 }
 void DriveSystem::Dump()
 {
-	dumparm.Set(1.0);
+	dumparm.Set(-1.0);
+	Wait(0.7);
+	dumparm.Set(0.0);
+	Wait(1.5);
+	dumparm.Set(0.75);
 	Wait(0.2);
 	dumparm.Set(0.0);
-	Wait(0.5);
-	dumpbuck.Set(-0.5);
-	Wait(0.5);
-	dumpbuck.Set(0.0);
 	Wait(3.0);
-	dumpbuck.Set(0.5);
+	/*dumpbuck.Set(0.5);
 	Wait(1.0);
-	dumpbuck.Set(0.0);
+	dumpbuck.Set(0.0);*/
 	/*Wait(0.1); // "Getting out of the way" so other robots can score
 	RTurn(55.0);
 	Drive(2300);*/
-	Wait(15.0);
 }
 void DriveSystem::AutoForward()
 {
@@ -332,6 +334,20 @@ void DriveSystem::ClimbSequence()
 			arm1.Set(0.0);
 			Wait(0.05);
 			basehook.Set(true);
+			Wait(0.05);  
+			/*HERE*/
+			reverse.Set(170.0); // shifting into low gear
+			Wait(0.5);
+			arm1.Set(-1.0);
+			basehook.Set(false);
+			while(climbenc.Get() > 0)
+			{
+				arm1.Set(-1.0);
+			}
+			arm1.Set(0.0);
+			Wait(0.05);
+			basehook.Set(true);
+			Wait(0.05);
 		}
 	}
 }
@@ -339,4 +355,15 @@ void DriveSystem::ClimbSequence()
 void DriveSystem::Basehook(bool tf)
 {
 	basehook.Set(tf);
+}
+
+void DriveSystem::PogoForward()
+{
+	//pogoforward->Set(Relay::kOn);
+	pogoforward->Set(Relay::kForward);
+}
+
+void DriveSystem::PogoBackward()
+{
+	pogobackward->Set(Relay::kOff);
 }
