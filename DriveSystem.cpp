@@ -11,17 +11,19 @@ DriveSystem::DriveSystem():
 	ds(DriverStation::GetInstance()),
 	dsLCD(DriverStationLCD::GetInstance()),
 	climbenc(3, 4),			//prototype: (3, 4)			| final:			***PORT 11 IS BENT, THATS WHY IT IS PORT 4***
-	ls(10),					//BOGUS PORT NUMBERS
+	ls(10),					//prototype: (10)
 	reverse(5),				//prototype: (5)			| final:
 	arm1(10),				//prototype: (10)			| final: (10)
 	//arm2(4),				//prototype: (4)			| final:
 	dumparm(3),				//prototype: (3)			| final: (3)
 	dumpbuck(4),			//prototype: (4)			| final: (4)
-	basehook(41)			//prototype: ( )			| final:
+	basehook(41),			//prototype: ( )			| final:
+	pogo(1)
 {
 	myRobot.SetExpiration(0.1);
-	pogoforward = new Relay(8, 1);
-	pogobackward = new Relay(8, 2); // on the final IT NEEDS TO GO INTO MODULE 3
+	//pogoforward = new Relay(8, 1);
+	//pogobackward = new Relay(8, 2); // on the final IT NEEDS TO GO INTO MODULE 3
+	//pogo2 = new Relay(1);
 	enc.Reset();
 	enc2.Reset();
 	enc.Start();
@@ -149,6 +151,7 @@ void DriveSystem::Printlines()
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "ClimbEnc: %i", climbenc.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Solenoid: %i", pogo.Get());
 	dsLCD->UpdateLCD();
 }
 
@@ -357,13 +360,42 @@ void DriveSystem::Basehook(bool tf)
 	basehook.Set(tf);
 }
 
-void DriveSystem::PogoForward()
+void DriveSystem::Pogo(bool tf)
 {
-	//pogoforward->Set(Relay::kOn);
-	pogoforward->Set(Relay::kForward);
+	pogo.Set(tf);
 }
 
-void DriveSystem::PogoBackward()
+void DriveSystem::SolenoidTest()
 {
-	pogobackward->Set(Relay::kOff);
+	Solenoid *s[8];
+	
+	for(int i = 0; i < 8; i++)
+	{
+		s[i] = new Solenoid(i + 1);
+	}
+	for(int i = 0; i < 8; i++)
+	{
+		s[i]->Set(true);
+	}
+	for(int i = 0; i < 8; i++)
+	{
+		s[i]->Set(false);
+		Wait(1.0);
+	}
+	for(int i = 0; i < 8; i++)
+	{
+		s[i]->Set(true);
+		Wait(1.0);
+		delete s[i];
+	}
+}
+
+void DriveSystem::RPogoOn()
+{
+	//pogo2->Set(Relay::kForward);
+}
+
+void DriveSystem::RPogoOff()
+{
+	//pogo2->Set(Relay::kReverse);
 }

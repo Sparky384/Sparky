@@ -183,11 +183,11 @@ public:
 			
 			if(stick2.GetRawButton(8))
 			{
-				sparky.ServoVal(0.0); // Shifting into high speed (?)
+				sparky.ServoVal(0.0); // Shifting into high speed
 			}
 			else if(stick2.GetRawButton(9))
 			{
-				sparky.ServoVal(170.0); // Shifting into low speed (?)
+				sparky.ServoVal(170.0); // Shifting into low speed
 			}
 			
 			
@@ -228,11 +228,11 @@ public:
 
 			if(stick1.GetRawButton(3))
 			{
-				sparky.PogoForward();
+				sparky.Pogo(true);
 			}
 			else if(stick1.GetRawButton(2))
 			{
-				sparky.PogoBackward();
+				sparky.Pogo(false);
 			}
 			else{}
 			//blinkylight->Set(Relay::kForward);
