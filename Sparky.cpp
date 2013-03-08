@@ -15,18 +15,35 @@ class RobotDemo : public SimpleRobot
 	DriverStationLCD *dsLCD;
 	DriveSystem sparky;
 	Compressor *compressor;
-	
+	Solenoid pogo1, pogo2, pogofwd, pogorev, basehook1fwd, basehook1rev, basehook2fwd, basehook2rev;
+	// Wire solenoid breakout to 24 Volts
 public:
 	RobotDemo(void):
 		stick1(1),		// as they are declared above.
 		stick2(2),
 		ds(DriverStation::GetInstance()),
 		dsLCD(DriverStationLCD::GetInstance()),
-		sparky()
+		sparky(),
+		pogo1(1),
+		pogo2(2),
+		pogofwd(3),
+		pogorev(4),
+		basehook1fwd(5),
+		basehook1rev(6),
+		basehook2fwd(7),
+		basehook2rev(8)
 	{
 		//blinkylight = new Relay(1);
 		compressor = new Compressor(9, 5); // final: (8,8) DIGITAL SIDECAR PORT 8 IS BAD!!!!
 		compressor->Start();
+		/*pogo0 = new Solenoid(0);
+		pogo1 = new Solenoid(1);
+		pogo2 = new Solenoid(2);
+		pogo3 = new Solenoid(3);
+		pogo4 = new Solenoid(4);
+		pogo5 = new Solenoid(5);
+		pogo6 = new Solenoid(6);
+		pogo7 = new Solenoid(7);*/
 	}
 
 	/**
@@ -130,8 +147,38 @@ public:
 		sparky.Reset();
 		sparky.GyroSens();
 		sparky.Safety(true);
+		basehook1fwd.Set(false);
+		basehook2fwd.Set(false);
+		basehook1rev.Set(true);
+		basehook2rev.Set(true);
+		pogofwd.Set(false);
+		pogorev.Set(true);
+		bool basetoggle = true;
+		bool pogotoggle = true;
 		while (true)
 		{
+			if(stick1.GetRawButton(2) && basetoggle)
+			{
+				basehook1fwd.Set(!basehook1fwd.Get());
+				basehook2fwd.Set(!basehook2fwd.Get());
+				basehook1rev.Set(!basehook1rev.Get());
+				basehook2rev.Set(!basehook2rev.Get());
+				basetoggle = false;
+			}
+			else if(!stick1.GetRawButton(2))
+			{
+				basetoggle = true;
+			}
+			if(stick1.GetRawButton(3) && pogotoggle)
+			{
+				pogofwd.Set(!pogofwd.Get());
+				pogorev.Set(!pogorev.Get());
+				pogotoggle = false;
+			}
+			else if(!stick1.GetRawButton(3))
+			{
+				pogotoggle = true;
+			}
 			//sparky.ClimbSequence();
 			sparky.GyroFixAngles();
 			sparky.Printlines();
@@ -189,13 +236,16 @@ public:
 			{
 				sparky.ServoVal(170.0); // Shifting into low speed
 			}
-			
-			
+			if(sparky.LSGet() == 1)
+			{
+				sparky.ClimberEncReset();
+			}
+			else{}
 			if(stick2.GetRawButton(6))
 			{
 				sparky.ForwardGrappler();
 			}
-			else if(stick2.GetRawButton(7))
+			else if(stick2.GetRawButton(7) && sparky.LSGet() == 0)
 			{
 				sparky.BackwardGrappler();
 			}
@@ -225,7 +275,7 @@ public:
 			{
 				sparky.NoDumper();
 			}
-
+			/*
 			if(stick1.GetRawButton(3))
 			{
 				sparky.Pogo(true);
@@ -235,6 +285,7 @@ public:
 				sparky.Pogo(false);
 			}
 			else{}
+			*/
 			//blinkylight->Set(Relay::kForward);
 			Wait(0.005);				// Wait for a motor update time
 		}

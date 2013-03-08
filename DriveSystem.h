@@ -64,11 +64,8 @@ public:
 	void Dump();
 	void AutoForward();
 	void ClimbSequence();
-	void Basehook(bool tf);
-	void Pogo(bool tf);
-	void SolenoidTest();
-	void RPogoOn();
-	void RPogoOff();
+	UINT32 LSGet();
+	void ClimberEncReset();
 };
 
 #endif

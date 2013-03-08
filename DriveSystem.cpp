@@ -151,7 +151,6 @@ void DriveSystem::Printlines()
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "ClimbEnc: %i", climbenc.Get());
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "Solenoid: %i", pogo.Get());
 	dsLCD->UpdateLCD();
 }
 
@@ -355,47 +354,19 @@ void DriveSystem::ClimbSequence()
 	}
 }
 
-void DriveSystem::Basehook(bool tf)
+UINT32 DriveSystem::LSGet()
 {
-	basehook.Set(tf);
-}
-
-void DriveSystem::Pogo(bool tf)
-{
-	pogo.Set(tf);
-}
-
-void DriveSystem::SolenoidTest()
-{
-	Solenoid *s[8];
-	
-	for(int i = 0; i < 8; i++)
+	if(ls.Get() == 1)
 	{
-		s[i] = new Solenoid(i + 1);
+		return 1;
 	}
-	for(int i = 0; i < 8; i++)
+	else
 	{
-		s[i]->Set(true);
-	}
-	for(int i = 0; i < 8; i++)
-	{
-		s[i]->Set(false);
-		Wait(1.0);
-	}
-	for(int i = 0; i < 8; i++)
-	{
-		s[i]->Set(true);
-		Wait(1.0);
-		delete s[i];
+		return 0;
 	}
 }
 
-void DriveSystem::RPogoOn()
+void DriveSystem::ClimberEncReset()
 {
-	//pogo2->Set(Relay::kForward);
-}
-
-void DriveSystem::RPogoOff()
-{
-	//pogo2->Set(Relay::kReverse);
+	climbenc.Reset();
 }
