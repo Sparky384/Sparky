@@ -17,13 +17,12 @@ private:
 	Encoder climbenc;
 	DigitalInput ls;
 	Servo reverse;
-	Victor arm1, dumparm, dumpbuck;
-	Solenoid basehook;
+	Victor climbmotor, dumparm, dumpbuck, shooter1, shooter2;
 	//Relay *pogoforward; // ***PROTOTYPE IS RELAY WHILE FINAL IS SOLENOIDS***
 	//Relay *pogobackward;
-	Solenoid pogo;
 	//Relay *pogo2;
-	
+	Solenoid pogofwd, pogorev, basehook1fwd, basehook1rev, basehook2fwd, basehook2rev, shooterfwd, shooterrev;
+	// Wire solenoid breakout to 24 Volts
 	
 
 	
@@ -41,6 +40,7 @@ public:
 	bool Safety(bool tf);
 	void GyroSens();
 	void GyroFixAngles();
+	int ConvertLS(); // TEMPORARY TESTER FOR PRINTING BOOL VALUES
 	void Printlines();
 	void SparkTank();
 	void SparkFirstArcade();
@@ -63,9 +63,20 @@ public:
 	void NoGrappler();
 	void Dump();
 	void AutoForward();
-	void ClimbSequence();
 	UINT32 LSGet();
 	void ClimberEncReset();
+	void TenseClimber();
+	void BasehookInit();
+	void BasehookToggle();
+	void PogoToggle();
+	void BasehookSwitch(bool toggle);
+	void PogoSwitch(bool toggle);
+	bool KillClimb();
+	void FirstClimb();
+	void SecondClimb();
+	void climbreset();
+	void ShooterPower(double magnitude);
+	void ShooterPiston();
 };
 
 #endif

@@ -13,12 +13,20 @@ DriveSystem::DriveSystem():
 	climbenc(3, 4),			//prototype: (3, 4)			| final:			***PORT 11 IS BENT, THATS WHY IT IS PORT 4***
 	ls(10),					//prototype: (10)
 	reverse(5),				//prototype: (5)			| final:
-	arm1(10),				//prototype: (10)			| final: (10)
+	climbmotor(10),				//prototype: (10)			| final: (10)
 	//arm2(4),				//prototype: (4)			| final:
 	dumparm(3),				//prototype: (3)			| final: (3)
 	dumpbuck(4),			//prototype: (4)			| final: (4)
-	basehook(41),			//prototype: ( )			| final:
-	pogo(1)
+	shooter1(100),
+	shooter2(101),
+	pogofwd(3),
+	pogorev(4),
+	basehook1fwd(5),
+	basehook1rev(6),
+	basehook2fwd(7),
+	basehook2rev(8),
+	shooterfwd(102),
+	shooterrev(103)
 {
 	myRobot.SetExpiration(0.1);
 	//pogoforward = new Relay(8, 1);
@@ -26,9 +34,9 @@ DriveSystem::DriveSystem():
 	//pogo2 = new Relay(1);
 	enc.Reset();
 	enc2.Reset();
+	climbenc.Reset();
 	enc.Start();
 	enc2.Start();
-	climbenc.Reset();
 	climbenc.Start();
 }
 
@@ -48,7 +56,7 @@ void DriveSystem::Drive(int distance)
 {
 	while(EncDriveLimit(distance))
 	{
-		myRobot.Drive(-0.45, 0.0); 	// prototype put a negative to go forward (-0.45)
+		myRobot.Drive(-0.30, 0.0); 	// prototype put a negative to go forward (-0.45)
 	}								// on the final don't put a negative to go forward
 	Wait(0.05);
 }
@@ -59,7 +67,7 @@ void DriveSystem::RTurn(double angle)
 	{
 		dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "Gyro Value: %f", gyro.GetAngle());
 		dsLCD->UpdateLCD();
-		myRobot.Drive(-0.15, 1.0);
+		myRobot.Drive(-0.17, 1.0);
 	}
 	enc.Reset();
 	enc2.Reset();
@@ -75,7 +83,7 @@ void DriveSystem::LTurn(double angle)
 		dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
 		dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder 2: %i", enc2.Get());
 		dsLCD->UpdateLCD();
-		myRobot.Drive(-0.15, -1.0);
+		myRobot.Drive(-0.3, -1.0);
 	}
 	enc.Reset();
 	enc2.Reset();
@@ -144,13 +152,27 @@ void DriveSystem::GyroFixAngles()
 	}
 }
 
+int DriveSystem::ConvertLS()
+{
+	if(ls.Get() == true)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 void DriveSystem::Printlines()
 {
 	float angle = gyro.GetAngle();
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
-	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Throttle: %f", stick2.GetZ());
+	//dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
+	//dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "ClimbEnc: %i", climbenc.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "limit switch: %i", ConvertLS());
 	dsLCD->UpdateLCD();
 }
 
@@ -182,7 +204,7 @@ void DriveSystem::PrintGyro()
 
 void DriveSystem::ArmOneVal(float value)
 {
-	arm1.Set(value);
+	climbmotor.Set(value);
 }
 
 void DriveSystem::ArmTwoVal(float value)
@@ -197,7 +219,7 @@ void DriveSystem::ServoVal(float value)
 
 void DriveSystem::ArmOneDisable()
 {
-	arm1.Disable();
+	climbmotor.Disable();
 }
 
 void DriveSystem::ArmTwoDisable()
@@ -235,26 +257,26 @@ void DriveSystem::ForwardGrappler()
 {
 	//reverse.SetAngle(170.0);
 	//Wait(0.25);
-	arm1.Set(1.0);
+	climbmotor.Set(1.0);
 }
 
 void DriveSystem::BackwardGrappler()
 {
-	arm1.Set(-1.0);
+	climbmotor.Set(-1.0);
 }
 
 void DriveSystem::NoGrappler()
 {
-	arm1.Set(0.0);
+	climbmotor.Set(0.0);
 }
 void DriveSystem::Dump()
 {
 	dumparm.Set(-1.0);
-	Wait(0.7);
+	Wait(0.6);
 	dumparm.Set(0.0);
 	Wait(1.5);
 	dumparm.Set(0.75);
-	Wait(0.2);
+	Wait(0.55);
 	dumparm.Set(0.0);
 	Wait(3.0);
 	/*dumpbuck.Set(0.5);
@@ -270,88 +292,11 @@ void DriveSystem::AutoForward()
 	{
 		reverse.SetAngle(0.0);
 		Wait(0.25);
-		arm1.Set(1.0);
+		climbmotor.Set(1.0);
 		Wait(1.0);
 	}
-	arm1.Set(0.0);
+	climbmotor.Set(0.0);
 	Wait(0.1);
-}
-
-void DriveSystem::ClimbSequence()
-{
-	if(ls.Get() == 1)
-	{
-		if(stick2.GetRawButton(10))
-		{
-			climbenc.Reset();
-			reverse.Set(0.0);
-			Wait(0.05);
-			arm1.Set(1.0);
-			while(climbenc.Get() < 70)
-			{
-				arm1.Set(1.0);
-			}
-			Wait(0.05);
-			arm1.Set(0.0);
-			Wait(0.05);
-			reverse.Set(170.0); // theoretically low gear
-			arm1.Set(-1.0);
-			while(climbenc.Get() > 0)
-			{
-				arm1.Set(-1.0);
-			}
-			arm1.Set(0.0);
-			Wait(0.05);
-			basehook.Set(true);
-			Wait(0.5);
-			reverse.Set(0.0); //shifting into high gear
-			Wait(0.05);
-			arm1.Set(1.0);
-			while(climbenc.Get() < 200)
-			{
-				arm1.Set(1.0);
-			}
-			arm1.Set(0.0);
-			Wait(0.05);
-			reverse.Set(170.0); // shifting into low gear
-			Wait(0.5);
-			arm1.Set(-1.0);
-			Wait(0.5);
-			basehook.Set(false);
-			while(climbenc.Get() > 0) // MAKE SURE TO INPUT POGO CODE. TEST IN TELEOP FIRST!!!!
-			{
-				arm1.Set(-1.0);
-			}
-			arm1.Set(0.0);
-			Wait(0.05);
-			basehook.Set(true);
-			Wait(0.05);
-			reverse.Set(0.0); // shifting into high gear
-			Wait(0.5);
-			arm1.Set(1.0);
-			while(climbenc.Get() < 200)
-			{
-				arm1.Set(1.0);
-			}
-			arm1.Set(0.0);
-			Wait(0.05);
-			basehook.Set(true);
-			Wait(0.05);  
-			/*HERE*/
-			reverse.Set(170.0); // shifting into low gear
-			Wait(0.5);
-			arm1.Set(-1.0);
-			basehook.Set(false);
-			while(climbenc.Get() > 0)
-			{
-				arm1.Set(-1.0);
-			}
-			arm1.Set(0.0);
-			Wait(0.05);
-			basehook.Set(true);
-			Wait(0.05);
-		}
-	}
 }
 
 UINT32 DriveSystem::LSGet()
@@ -369,4 +314,168 @@ UINT32 DriveSystem::LSGet()
 void DriveSystem::ClimberEncReset()
 {
 	climbenc.Reset();
+}
+
+void DriveSystem::TenseClimber()
+{
+	climbmotor.Set(-0.4);
+}
+
+void DriveSystem::BasehookInit()
+{
+	basehook1fwd.Set(false);
+	basehook2fwd.Set(false);
+	basehook1rev.Set(true);
+	basehook2rev.Set(true);
+	pogofwd.Set(false);
+	pogorev.Set(true);
+}
+
+void DriveSystem::BasehookToggle()
+{
+	/*
+	bool basetoggle;
+	if(stick2.GetRawButton(11) && basetoggle)
+	{
+		basehook1fwd.Set(!basehook1fwd.Get());
+		basehook2fwd.Set(!basehook2fwd.Get());
+		basehook1rev.Set(!basehook1rev.Get());
+		basehook2rev.Set(!basehook2rev.Get());
+		basetoggle = false;
+	}
+	else if(!stick2.GetRawButton(11))
+	{
+		basetoggle = true;
+	}
+	*/
+}
+
+void DriveSystem::PogoToggle()
+{
+	/*
+	bool pogotoggle;
+	if(stick2.GetRawButton(10) && pogotoggle)
+	{
+		pogofwd.Set(!pogofwd.Get());
+		pogorev.Set(!pogorev.Get());
+		pogotoggle = false;
+	}
+	else if(!stick1.GetRawButton(10))
+	{
+		pogotoggle = true;
+	}
+	*/
+}
+
+void DriveSystem::BasehookSwitch(bool toggle)
+{
+	basehook1fwd.Set(toggle);
+	basehook2fwd.Set(toggle);
+	basehook1rev.Set(!toggle);
+	basehook2rev.Set(!toggle);
+	
+}
+
+void DriveSystem::PogoSwitch(bool toggle)
+{
+	
+	pogofwd.Set(toggle);
+	pogorev.Set(!toggle);
+	
+}
+
+
+
+bool DriveSystem::KillClimb()
+{
+	bool killswitch = false;
+	return killswitch;
+}
+
+void DriveSystem::FirstClimb()
+{
+	if(stick2.GetRawButton(10))
+	{
+		return;
+	}
+	else if(!stick2.GetRawButton(10))
+	{
+		reverse.Set(170.0);
+		while(!ls.Get()) // limit switch returns true when fully retracted
+		{
+			climbmotor.Set(-1.0); // retracts climber all the way
+		}
+		climbmotor.Set(0.0); // cuts the climber motor
+		BasehookSwitch(true); // engages the basehooks
+		/*Wait(1.0);
+		while(climbenc.Get() < 200) // extends a bit to put weight on the basehooks
+		{
+			climbmotor.Set(1.0);
+		}*/
+	}
+}
+
+void DriveSystem::SecondClimb()
+{
+	if(stick2.GetRawButton(10))
+	{
+		return;
+	}
+	else if(!stick2.GetRawButton(10))
+	{
+		/*reverse.Set(0.0); // set into high gear
+		Wait(1.0);
+		while(climbenc.Get() < 2200) // extend all the way
+		{
+			climbmotor.Set(1.0);
+		}
+		climbmotor.Set(0.0); // cut the climber motor
+		Wait(1.0);*/ // cannot reliably automate.  Will be done by driver
+		reverse.Set(170.0); // set into low gear
+		Wait(1.0);
+		while(climbenc.Get() > 2000) // retract to take weight off of basehooks
+		{
+			climbmotor.Set(-1.0);
+		}
+		BasehookSwitch(false); // disengage basehooks
+		//climbmotor.Set(-0.3);
+		climbmotor.Set(0.0); //cut the climber motor
+		//Wait(0.5);
+		PogoSwitch(true); // engage stinger
+		Wait(1.0);
+		while(climbenc.Get() > 1200) // retract until the bump is under the frame ** 1300 was too much **
+		{
+			climbmotor.Set(-1.0);
+		}
+		//climbmotor.Set(0.0); // cut the climber motor
+		PogoSwitch(false); // disengage the pogo
+		//Wait(1.0); // waits one second
+		//FirstClimb(); // starts the first climb code
+		while(!ls.Get()) // limit switch returns true when fully retracted
+		{
+			climbmotor.Set(-1.0); // retracts climber all the way
+		}
+		climbmotor.Set(0.0); // cuts the climber motor
+		BasehookSwitch(true); // engages the basehooks
+	}
+}
+
+void DriveSystem::climbreset()
+{
+	climbenc.Reset();
+}
+
+void DriveSystem::ShooterPower(double magnitude)
+{
+	shooter1.Set(magnitude);
+	shooter2.Set(magnitude);
+}
+
+void DriveSystem::ShooterPiston()
+{
+	shooterfwd.Set(true);
+	shooterrev.Set(false);
+	Wait(1.0);
+	shooterfwd.Set(false);
+	shooterrev.Set(true);
 }
