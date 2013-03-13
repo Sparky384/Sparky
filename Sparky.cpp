@@ -15,6 +15,7 @@ class RobotDemo : public SimpleRobot
 	DriverStationLCD *dsLCD;
 	DriveSystem sparky;
 	Compressor *compressor;
+	AxisCamera *camera;
 public:
 	RobotDemo(void):
 		stick1(1),		// as they are declared above.
@@ -26,6 +27,14 @@ public:
 		//blinkylight = new Relay(1);
 		compressor = new Compressor(9, 5); // final: (8,8) DIGITAL SIDECAR PORT 8 IS BAD!!!!
 		compressor->Start();
+		camera = &AxisCamera::GetInstance("10.3.84.11");
+		camera->WriteResolution(AxisCameraParams::kResolution_320x240);
+		camera->WriteWhiteBalance(AxisCameraParams::kWhiteBalance_Hold);
+		camera->WriteExposureControl(AxisCameraParams::kExposure_Hold);
+		camera->WriteColorLevel(100);
+		camera->WriteCompression(30);
+		camera->WriteBrightness(30);
+		camera->WriteMaxFPS(10);
 	}
 	
 	void Autonomous(void)
@@ -129,21 +138,13 @@ public:
 		bool bt = true;
 		//bool pt = true;
 		bool bflip = false;
-		//bool pflip = false;
-		bool climb = false;
+		bool pflip = false;
+		//bool climb = false;
 		while (true)
 		{
+			
 			//sparky.BasehookSwitch(bflip);
 			//sparky.PogoSwitch(pflip);
-			if(stick2.GetRawButton(11) && bt)
-			{
-				bflip = !bflip;
-				bt = false;
-			}
-			else if(!stick2.GetRawButton(11))
-			{
-				bt = true;
-			}
 			/*
 			if(stick2.GetRawButton(10) && pt)
 			{
@@ -178,19 +179,28 @@ public:
 			if(stick1.GetRawButton(10))
 			{
 				sparky.FirstClimb();
-				climb = true;
-				//bflip = true;
-				//pflip = false;
+				//climb = true;
+				bflip = true;
+				pflip = false;
 			}
 			else if(stick1.GetRawButton(11))
 			{
 				sparky.SecondClimb();
-				//bflip = true;
-				//pflip = false;
+				bflip = true;
+				pflip = false;
 			}
-			else if(climb == false)
+			else
 			{
 				sparky.BasehookSwitch(bflip);
+				if(stick2.GetRawButton(11) && bt)
+				{
+					bflip = !bflip;
+					bt = false;
+				}
+				else if(!stick2.GetRawButton(11))
+				{
+					bt = true;
+				}
 				//sparky.PogoSwitch(pflip);
 			}
 			if(stick1.GetRawButton(6) && stick1.GetRawButton(7))
