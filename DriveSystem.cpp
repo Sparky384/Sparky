@@ -4,29 +4,29 @@ DriveSystem::DriveSystem():
 	myRobot(9, 7, 8, 6),	//prototype: (2, 1)			| final: (1, 7, 2, 8)
 	stick1(1),
 	stick2(2),
-	gyro(2),				//prototype: (2)			| final:
+	gyro(1),				//prototype: (2)			| final:
 	//adxl(1, 5, 6, 7, 8),	//prototype: (1, 5, 6, 7, 8)| final:
 	enc(1, 2),				//prototype: (1, 2)			| final: (1, 2)?
-	enc2(13, 14),			//prototype: (13, 14)		| final: (13, 14)?
+	enc2(100, 101),			//prototype: (13, 14)		| final: (13, 14)?
 	ds(DriverStation::GetInstance()),
 	dsLCD(DriverStationLCD::GetInstance()),
-	climbenc(3, 4),			//prototype: (3, 4)			| final:			***PORT 11 IS BENT, THATS WHY IT IS PORT 4***
+	climbenc(13, 14),			//prototype: (3, 4)			| final:			***PORT 11 IS BENT, THATS WHY IT IS PORT 4***
 	ls(10),					//prototype: (10)
 	reverse(5),				//prototype: (5)			| final:
-	climbmotor(10),				//prototype: (10)			| final: (10)
+	climbmotor(10),			//prototype: (10)			| final: (10)
 	//arm2(4),				//prototype: (4)			| final:
-	dumparm(3),				//prototype: (3)			| final: (3)
-	dumpbuck(4),			//prototype: (4)			| final: (4)
-	shooter1(100),
-	shooter2(101),
+	dumparm(100),			//prototype: (3)			| final: (3)
+	dumpbuck(101),			//prototype: (4)			| final: (4)
+	shooter1(3),
+	shooter2(4),
 	pogofwd(3),
 	pogorev(4),
-	basehook1fwd(5),
-	basehook1rev(6),
-	basehook2fwd(7),
-	basehook2rev(8),
-	shooterfwd(102),
-	shooterrev(103)
+	basehookfwd(5),
+	basehookrev(6),
+	minipogofwd(7),
+	minipogorev(8),
+	shooterfwd(1),
+	shooterrev(2)
 {
 	myRobot.SetExpiration(0.1);
 	//pogoforward = new Relay(8, 1);
@@ -169,8 +169,8 @@ void DriveSystem::Printlines()
 	float angle = gyro.GetAngle();
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Throttle: %f", stick2.GetZ());
-	//dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
-	//dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "ClimbEnc: %i", climbenc.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "limit switch: %i", ConvertLS());
 	dsLCD->UpdateLCD();
@@ -323,12 +323,14 @@ void DriveSystem::TenseClimber()
 
 void DriveSystem::BasehookInit()
 {
-	basehook1fwd.Set(false);
-	basehook2fwd.Set(false);
-	basehook1rev.Set(true);
-	basehook2rev.Set(true);
+	basehookfwd.Set(false);
+	basehookrev.Set(true);
 	pogofwd.Set(false);
 	pogorev.Set(true);
+	shooterfwd.Set(false);
+	shooterrev.Set(true);
+	minipogofwd.Set(false);
+	minipogorev.Set(true);
 }
 
 void DriveSystem::BasehookToggle()
@@ -369,10 +371,8 @@ void DriveSystem::PogoToggle()
 
 void DriveSystem::BasehookSwitch(bool toggle)
 {
-	basehook1fwd.Set(toggle);
-	basehook2fwd.Set(toggle);
-	basehook1rev.Set(!toggle);
-	basehook2rev.Set(!toggle);
+	basehookfwd.Set(toggle);
+	basehookrev.Set(!toggle);
 	
 }
 
@@ -394,12 +394,6 @@ bool DriveSystem::KillClimb()
 
 void DriveSystem::FirstClimb()
 {
-	if(stick2.GetRawButton(10))
-	{
-		return;
-	}
-	else if(!stick2.GetRawButton(10))
-	{
 		reverse.Set(170.0);
 		while(!ls.Get()) // limit switch returns true when fully retracted
 		{
@@ -412,17 +406,10 @@ void DriveSystem::FirstClimb()
 		{
 			climbmotor.Set(1.0);
 		}*/
-	}
 }
 
 void DriveSystem::SecondClimb()
 {
-	if(stick2.GetRawButton(10))
-	{
-		return;
-	}
-	else if(!stick2.GetRawButton(10))
-	{
 		/*reverse.Set(0.0); // set into high gear
 		Wait(1.0);
 		while(climbenc.Get() < 2200) // extend all the way
@@ -457,7 +444,6 @@ void DriveSystem::SecondClimb()
 		}
 		climbmotor.Set(0.0); // cuts the climber motor
 		BasehookSwitch(true); // engages the basehooks
-	}
 }
 
 void DriveSystem::climbreset()
@@ -465,17 +451,45 @@ void DriveSystem::climbreset()
 	climbenc.Reset();
 }
 
-void DriveSystem::ShooterPower(double magnitude)
+void DriveSystem::ShooterFullPower(bool power)
 {
-	shooter1.Set(magnitude);
-	shooter2.Set(magnitude);
+	if(power == true)
+	{
+		shooter1.Set(1.0);
+		shooter2.Set(1.0);
+	}
+	else
+	{
+		shooter1.Set(0.0);
+		shooter2.Set(0.0);
+	}
+}
+
+void DriveSystem::ShooterSomePower(bool power)
+{
+	if(power == true)
+	{
+		shooter1.Set(0.5);
+		shooter2.Set(0.5);
+	}
+	else
+	{
+		shooter1.Set(0.0);
+		shooter2.Set(0.0);
+	}
 }
 
 void DriveSystem::ShooterPiston()
 {
 	shooterfwd.Set(true);
 	shooterrev.Set(false);
-	Wait(1.0);
+	Wait(0.5);
 	shooterfwd.Set(false);
 	shooterrev.Set(true);
+}
+
+void DriveSystem::MiniPogo(bool toggle)
+{
+	minipogofwd.Set(toggle);
+	minipogorev.Set(!toggle);
 }

@@ -21,7 +21,7 @@ private:
 	//Relay *pogoforward; // ***PROTOTYPE IS RELAY WHILE FINAL IS SOLENOIDS***
 	//Relay *pogobackward;
 	//Relay *pogo2;
-	Solenoid pogofwd, pogorev, basehook1fwd, basehook1rev, basehook2fwd, basehook2rev, shooterfwd, shooterrev;
+	Solenoid pogofwd, pogorev, basehookfwd, basehookrev, minipogofwd, minipogorev, shooterfwd, shooterrev;
 	// Wire solenoid breakout to 24 Volts
 	
 
@@ -75,8 +75,10 @@ public:
 	void FirstClimb();
 	void SecondClimb();
 	void climbreset();
-	void ShooterPower(double magnitude);
+	void ShooterFullPower(bool power);
+	void ShooterSomePower(bool power);
 	void ShooterPiston();
+	void MiniPogo(bool toggle);
 };
 
 #endif

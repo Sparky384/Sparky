@@ -42,18 +42,19 @@ public:
 		sparky.Safety(false);
 		sparky.Reset();
 		sparky.GyroSens();
+		bool sparkyauto = true;
 		while(IsAutonomous() && IsEnabled()) // this is a change
 		{
 			sparky.InvertMotors(true);
-			if(ds->GetDigitalIn(1)) //QUADRANT 1 - DRIVE STRAIGHT
+			if(ds->GetDigitalIn(1) && sparkyauto == true) //QUADRANT 1 - DRIVE STRAIGHT
 			{
 				sparky.Printlines();
 				sparky.Drive(1200); // 1 foot equals 230 encoder counts
 				sparky.Stop();		// this autonomous is complete!
 				sparky.Dump();
-				Wait(15.0);
+				sparkyauto = false;
 			}
-			else if(ds->GetDigitalIn(2)) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
+			else if(ds->GetDigitalIn(2) && sparkyauto == true) //QUADRANT 2 - DRIVE STRAIGHT THEN TURN LEFT INTO GOAL
 			{
 				sparky.Printlines();	// this autonomous is complete!
 				sparky.Drive(900);
@@ -62,9 +63,9 @@ public:
 				sparky.Drive(1200);
 				sparky.Stop();
 				sparky.Dump();
-				Wait(15.0);
+				sparkyauto = false;
 			}
-			else if(ds->GetDigitalIn(3)) // QUADRANT 3 - DRIVE STRAIGHT, TURN 90 DEGREES, THEN IMPLEMENT INPUT 2
+			else if(ds->GetDigitalIn(3) && sparkyauto == true) // QUADRANT 3 - DRIVE STRAIGHT, TURN 90 DEGREES, THEN IMPLEMENT INPUT 2
 			{
 				sparky.Printlines();
 				sparky.Drive(900);
@@ -74,9 +75,9 @@ public:
 				sparky.Drive(1200);
 				sparky.Stop();
 				sparky.Dump();
-				Wait(15.0);
+				sparkyauto = false;
 			}
-			else if(ds->GetDigitalIn(4)) //DRIVE STRAIGHT, THEN TURN 45 TO GOAL
+			else if(ds->GetDigitalIn(4) && sparkyauto == true) //DRIVE STRAIGHT, THEN TURN 45 TO GOAL
 			{
 				sparky.Printlines();
 				sparky.Drive(2775);
@@ -84,9 +85,9 @@ public:
 				sparky.Drive(900);
 				sparky.Stop(); // COMPLETE!
 				sparky.Dump();
-				Wait(15.0);
+				sparkyauto = false;
 			}
-			else if(ds->GetDigitalIn(5)) //DRIVE UNDER PYRAMID, TURN 90, THEN INPUT 2 CODE
+			else if(ds->GetDigitalIn(5) && sparkyauto == true) //DRIVE UNDER PYRAMID, TURN 90, THEN INPUT 2 CODE
 			{
 				sparky.Printlines();
 				sparky.Drive(1750);
@@ -94,36 +95,66 @@ public:
 				sparky.Drive(2175);
 				sparky.Stop();
 				sparky.Dump();
-				Wait(15.0);
+				sparkyauto = false;
 			}
-			else if(ds->GetDigitalIn(6)) // ANGLE OFF CENTER FROM THE BACK.
-			{
-				sparky.Printlines();
-				sparky.Drive(3600); // COMPLETE!
-				sparky.Stop();
-				sparky.Dump();
-				Wait(15.0);
-			}
-			else if(ds->GetDigitalIn(7)) // SHORT STRAIGHT DRIVE, TURN 90, FORWARD, 45 TURN, DRIVE TO GOAL
+			else if(ds->GetDigitalIn(6) && sparkyauto == true) // shoot from left of pyramid
 			{
 				sparky.Printlines();
 				sparky.Drive(460);
+				sparky.Stop();
+				// Test for gyro angle!
+				sparky.ShooterFullPower(true);
+				Wait(3.0); // arbitrary value
+				sparky.ShooterPiston();
+				Wait(2.0); // arbitrary value
+				sparky.ShooterPiston();
+				Wait(2.0);
+				sparky.ShooterPiston();
+				sparky.ShooterFullPower(false);
+				sparkyauto = false;
+			}
+			else if(ds->GetDigitalIn(7) && sparkyauto == true) // shooter from right of pyramid
+			{
+				sparky.Printlines();
+				sparky.Drive(460);
+				sparky.Stop();
+				// Test for gyro angle!
+				sparky.ShooterFullPower(true);
+				Wait(3.0); // arbitrary value
+				sparky.ShooterPiston();
+				Wait(2.0); // arbitrary value
+				sparky.ShooterPiston();
+				Wait(2.0);
+				sparky.ShooterPiston();
+				sparky.ShooterFullPower(false);
+				/*
 				sparky.RTurn(90.0);
 				sparky.Drive(1073);
 				sparky.LTurn(35.0);
 				sparky.Drive(1610);
 				sparky.Stop();
 				sparky.Dump();
-				Wait(15.0);
+				*/
+				sparkyauto = false;
+			}
+			else if(ds->GetDigitalIn(8) && sparkyauto == true)
+			{
+				sparky.Printlines();
+				sparky.ShooterFullPower(true);
+				Wait(3.0); // arbitrary value
+				sparky.ShooterPiston();
+				Wait(2.0); // arbitrary value
+				sparky.ShooterPiston();
+				Wait(2.0);
+				sparky.ShooterPiston();
+				sparky.ShooterFullPower(false);
+				sparkyauto = false;
 			}
 			else
 			{
 				sparky.PrintGyro();
-				sparky.Stop();
 			}
-			sparky.Stop();
 		}
-		sparky.Stop();
 	} // End autonomous Block
 
 	/**
@@ -136,46 +167,19 @@ public:
 		sparky.Safety(true);
 		sparky.BasehookInit();
 		bool bt = true;
-		//bool pt = true;
+		bool pt = true;
 		bool bflip = false;
 		bool pflip = false;
 		//bool climb = false;
+		bool shooterfulltoggle = true;
+		bool shooterhalftoggle = true;
+		bool fullshoot = false;
+		bool halfshoot = false;
 		while (true)
 		{
-			
-			//sparky.BasehookSwitch(bflip);
-			//sparky.PogoSwitch(pflip);
-			/*
-			if(stick2.GetRawButton(10) && pt)
-			{
-				pflip = !pflip;
-				pt = false;
-			}
-			else if(!stick2.GetRawButton(10))
-			{
-				pt = true;
-			}
-			*/
-			/*
-			if(stick2.GetRawButton(5))
-			{
-				//basetoggle = sparky.BasehookToggle(basetoggle);
-				sparky.BasehookSwitch(true);
-			}
-			*/
-			/*else if(!stick2.GetRawButton(2))
-			{
-				basetoggle = true;
-			}
-			if(stick2.GetRawButton(4))
-			{
-				//pogotoggle = sparky.PogoToggle(pogotoggle);
-				sparky.BasehookSwitch(false);
-			}
-			else if(!stick2.GetRawButton(3))
-			{
-				pogotoggle = true;
-			}*/
+			sparky.GyroFixAngles();
+			sparky.Printlines();
+			sparky.InvertMotors(true);
 			if(stick1.GetRawButton(10))
 			{
 				sparky.FirstClimb();
@@ -201,15 +205,19 @@ public:
 				{
 					bt = true;
 				}
-				//sparky.PogoSwitch(pflip);
+				sparky.MiniPogo(pflip);
+				if(stick2.GetRawButton(10) && pt)
+				{
+					pflip = !pflip;
+					pt = false;
+				}
+				else if(!stick2.GetRawButton(10))
+				{
+					pt = true;
+				}
+				
 			}
-			if(stick1.GetRawButton(6) && stick1.GetRawButton(7))
-			{
-				//killswitch = sparky.KillClimb();
-			}
-			sparky.GyroFixAngles();
-			sparky.Printlines();
-			sparky.InvertMotors(true);
+			
 			if(stick1.GetTrigger() == true && stick2.GetTrigger() == true)
 			{
 				sparky.SparkTank();
@@ -259,15 +267,28 @@ public:
 			{
 				sparky.NoDumper();
 			}
-			if(stick2.GetRawButton(2))
+			//sparky.ShooterFullPower(fullshoot);
+			//sparky.ShooterSomePower(halfshoot);
+			if(stick2.GetRawButton(2) && shooterfulltoggle)
 			{
-				sparky.ShooterPower(1.0); // full speed shooter
+				sparky.ShooterFullPower(!fullshoot); // full speed shooter
+				fullshoot = !fullshoot;
+				shooterfulltoggle = false;
 			}
-			else if(stick2.GetRawButton(3))
+			else if(!stick2.GetRawButton(2))
 			{
-				sparky.ShooterPower(0.5); // half speed shooter
+				shooterfulltoggle = true;
 			}
-			else{}
+			if(stick2.GetRawButton(3) && shooterhalftoggle)
+			{
+				sparky.ShooterSomePower(!halfshoot);
+				halfshoot = !halfshoot;
+				shooterhalftoggle = false;
+			}
+			else if(!stick2.GetRawButton(3))
+			{
+				shooterhalftoggle = true;
+			}
 			if(stick2.GetTrigger())
 			{
 				sparky.ShooterPiston();
