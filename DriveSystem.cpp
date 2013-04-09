@@ -26,7 +26,8 @@ DriveSystem::DriveSystem():
 	minipogofwd(7),
 	minipogorev(8),
 	shooterfwd(1),
-	shooterrev(2)
+	shooterrev(2),
+	shooterlight(5)
 {
 	myRobot.SetExpiration(0.1);
 	//pogoforward = new Relay(8, 1);
@@ -38,6 +39,7 @@ DriveSystem::DriveSystem():
 	enc.Start();
 	enc2.Start();
 	climbenc.Start();
+	//light = new Relay(1);
 }
 
 bool DriveSystem::EncDriveLimit(int distance)
@@ -455,13 +457,15 @@ void DriveSystem::ShooterFullPower(bool power)
 {
 	if(power == true)
 	{
-		shooter1.Set(1.0);
+		shooter1.Set(-1.0);
 		shooter2.Set(1.0);
+		shooterlight.Set(1.0);
 	}
 	else
 	{
 		shooter1.Set(0.0);
 		shooter2.Set(0.0);
+		shooterlight.Set(0.0);
 	}
 }
 
@@ -469,13 +473,15 @@ void DriveSystem::ShooterSomePower(bool power)
 {
 	if(power == true)
 	{
-		shooter1.Set(0.5);
+		shooter1.Set(-0.5);
 		shooter2.Set(0.5);
+		shooterlight.Set(1.0);
 	}
 	else
 	{
 		shooter1.Set(0.0);
 		shooter2.Set(0.0);
+		shooterlight.Set(0.0);
 	}
 }
 

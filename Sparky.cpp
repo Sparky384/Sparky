@@ -25,7 +25,7 @@ public:
 		sparky()
 	{
 		//blinkylight = new Relay(1);
-		compressor = new Compressor(9, 5); // final: (8,8) DIGITAL SIDECAR PORT 8 IS BAD!!!!
+		compressor = new Compressor(9, 3); // final: (8,8) DIGITAL SIDECAR PORT 8 IS BAD!!!!
 		compressor->Start();
 		camera = &AxisCamera::GetInstance("10.3.84.11");
 		camera->WriteResolution(AxisCameraParams::kResolution_320x240);
@@ -97,11 +97,9 @@ public:
 				sparky.Dump();
 				sparkyauto = false;
 			}
-			else if(ds->GetDigitalIn(6) && sparkyauto == true) // shoot from left of pyramid
+			else if(ds->GetDigitalIn(6) && sparkyauto == true) // shoot, leave from right of pyramid
 			{
 				sparky.Printlines();
-				sparky.Drive(460);
-				sparky.Stop();
 				// Test for gyro angle!
 				sparky.ShooterFullPower(true);
 				Wait(3.0); // arbitrary value
@@ -111,13 +109,17 @@ public:
 				Wait(2.0);
 				sparky.ShooterPiston();
 				sparky.ShooterFullPower(false);
+				sparky.Drive(200);
+				sparky.Stop();
+				sparky.LTurn(90.0);
+				sparky.Drive(50);
+				sparky.Stop();
+				sparky.LTurn(90.0);
 				sparkyauto = false;
 			}
-			else if(ds->GetDigitalIn(7) && sparkyauto == true) // shooter from right of pyramid
+			else if(ds->GetDigitalIn(7) && sparkyauto == true) // shoot, leave from left of pyramid
 			{
 				sparky.Printlines();
-				sparky.Drive(460);
-				sparky.Stop();
 				// Test for gyro angle!
 				sparky.ShooterFullPower(true);
 				Wait(3.0); // arbitrary value
@@ -127,6 +129,12 @@ public:
 				Wait(2.0);
 				sparky.ShooterPiston();
 				sparky.ShooterFullPower(false);
+				sparky.Drive(200);
+				sparky.Stop();
+				sparky.LTurn(90.0);
+				sparky.Drive(50);
+				sparky.Stop();
+				sparky.LTurn(90.0);
 				/*
 				sparky.RTurn(90.0);
 				sparky.Drive(1073);
@@ -141,7 +149,7 @@ public:
 			{
 				sparky.Printlines();
 				sparky.ShooterFullPower(true);
-				Wait(3.0); // arbitrary value
+				Wait(2.0); // arbitrary value
 				sparky.ShooterPiston();
 				Wait(2.0); // arbitrary value
 				sparky.ShooterPiston();
@@ -267,8 +275,12 @@ public:
 			{
 				sparky.NoDumper();
 			}
+			
+			// *** SHOOTER ***
 			//sparky.ShooterFullPower(fullshoot);
 			//sparky.ShooterSomePower(halfshoot);
+			
+			// ** Shooter full power **
 			if(stick2.GetRawButton(2) && shooterfulltoggle)
 			{
 				sparky.ShooterFullPower(!fullshoot); // full speed shooter
@@ -279,6 +291,8 @@ public:
 			{
 				shooterfulltoggle = true;
 			}
+			
+			// ** Shooter "half" power **
 			if(stick2.GetRawButton(3) && shooterhalftoggle)
 			{
 				sparky.ShooterSomePower(!halfshoot);
@@ -289,11 +303,12 @@ public:
 			{
 				shooterhalftoggle = true;
 			}
+			
 			if(stick2.GetTrigger())
 			{
 				sparky.ShooterPiston();
 			}
-			else{}
+			// else{}
 			Wait(0.005);				// Wait for a motor update time
 		}
 	}

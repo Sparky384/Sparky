@@ -21,8 +21,10 @@ private:
 	//Relay *pogoforward; // ***PROTOTYPE IS RELAY WHILE FINAL IS SOLENOIDS***
 	//Relay *pogobackward;
 	//Relay *pogo2;
+	//Relay *light;
 	Solenoid pogofwd, pogorev, basehookfwd, basehookrev, minipogofwd, minipogorev, shooterfwd, shooterrev;
 	// Wire solenoid breakout to 24 Volts
+	Victor shooterlight;
 	
 
 	
