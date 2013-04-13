@@ -24,7 +24,7 @@ private:
 	//Relay *light;
 	Solenoid pogofwd, pogorev, basehookfwd, basehookrev, minipogofwd, minipogorev, shooterfwd, shooterrev;
 	// Wire solenoid breakout to 24 Volts
-	Victor shooterlight;
+	Relay *shooterlight;
 	
 
 	
@@ -44,6 +44,7 @@ public:
 	void GyroFixAngles();
 	int ConvertLS(); // TEMPORARY TESTER FOR PRINTING BOOL VALUES
 	void Printlines();
+	void TeleOpPrintlines(bool LimitSwitchToggle);
 	void SparkTank();
 	void SparkFirstArcade();
 	void SparkSecondArcade();

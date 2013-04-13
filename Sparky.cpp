@@ -149,9 +149,9 @@ public:
 			{
 				sparky.Printlines();
 				sparky.ShooterFullPower(true);
-				Wait(2.0); // arbitrary value
+				Wait(3.5);
 				sparky.ShooterPiston();
-				Wait(2.0); // arbitrary value
+				Wait(2.0);
 				sparky.ShooterPiston();
 				Wait(2.0);
 				sparky.ShooterPiston();
@@ -178,15 +178,16 @@ public:
 		bool pt = true;
 		bool bflip = false;
 		bool pflip = false;
-		//bool climb = false;
+		// bool climb = false;
 		bool shooterfulltoggle = true;
 		bool shooterhalftoggle = true;
 		bool fullshoot = false;
 		bool halfshoot = false;
+		bool LimitSwitchClosed = true;
 		while (true)
 		{
 			sparky.GyroFixAngles();
-			sparky.Printlines();
+			sparky.TeleOpPrintlines(LimitSwitchClosed);
 			sparky.InvertMotors(true);
 			if(stick1.GetRawButton(10))
 			{
@@ -213,7 +214,7 @@ public:
 				{
 					bt = true;
 				}
-				sparky.MiniPogo(pflip);
+				sparky.PogoSwitch(pflip);
 				if(stick2.GetRawButton(10) && pt)
 				{
 					pflip = !pflip;
@@ -249,13 +250,15 @@ public:
 			}
 			if(sparky.LSGet() == 1)
 			{
+				LimitSwitchClosed = true;
 				sparky.ClimberEncReset();
 			}
 			if(stick2.GetRawButton(6))
 			{
+				LimitSwitchClosed = false;
 				sparky.ForwardGrappler();
 			}
-			else if(stick2.GetRawButton(7) && sparky.LSGet() == 0)
+			else if(stick2.GetRawButton(7) && !LimitSwitchClosed)
 			{
 				sparky.BackwardGrappler();
 			}

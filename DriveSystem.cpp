@@ -26,8 +26,7 @@ DriveSystem::DriveSystem():
 	minipogofwd(7),
 	minipogorev(8),
 	shooterfwd(1),
-	shooterrev(2),
-	shooterlight(5)
+	shooterrev(2)
 {
 	myRobot.SetExpiration(0.1);
 	//pogoforward = new Relay(8, 1);
@@ -40,6 +39,7 @@ DriveSystem::DriveSystem():
 	enc2.Start();
 	climbenc.Start();
 	//light = new Relay(1);
+	shooterlight = new Relay(4);
 }
 
 bool DriveSystem::EncDriveLimit(int distance)
@@ -175,6 +175,18 @@ void DriveSystem::Printlines()
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "ClimbEnc: %i", climbenc.Get());
 	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "limit switch: %i", ConvertLS());
+	dsLCD->UpdateLCD();
+}
+
+void DriveSystem::TeleOpPrintlines(bool LimitSwitchToggle)
+{
+	float angle = gyro.GetAngle();
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "Gyro: %f", angle);
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Throttle: %f", stick2.GetZ());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Encoder: %i", enc.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line3, "Encoder2: %i", enc2.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line4, "ClimbEnc: %i", climbenc.Get());
+	dsLCD->PrintfLine(DriverStationLCD::kUser_Line5, "limit switch: %i", LimitSwitchToggle);
 	dsLCD->UpdateLCD();
 }
 
@@ -386,8 +398,6 @@ void DriveSystem::PogoSwitch(bool toggle)
 	
 }
 
-
-
 bool DriveSystem::KillClimb()
 {
 	bool killswitch = false;
@@ -432,7 +442,7 @@ void DriveSystem::SecondClimb()
 		//Wait(0.5);
 		PogoSwitch(true); // engage stinger
 		Wait(1.0);
-		while(climbenc.Get() > 1200) // retract until the bump is under the frame ** 1300 was too much **
+		while(climbenc.Get() > 1300) // retract until the bump is under the frame ** 1300 was too much **
 		{
 			climbmotor.Set(-1.0);
 		}
@@ -459,13 +469,13 @@ void DriveSystem::ShooterFullPower(bool power)
 	{
 		shooter1.Set(-1.0);
 		shooter2.Set(1.0);
-		shooterlight.Set(1.0);
+		shooterlight->Set(Relay::kForward);
 	}
 	else
 	{
 		shooter1.Set(0.0);
 		shooter2.Set(0.0);
-		shooterlight.Set(0.0);
+		shooterlight->Set(Relay::kOff);
 	}
 }
 
@@ -475,13 +485,13 @@ void DriveSystem::ShooterSomePower(bool power)
 	{
 		shooter1.Set(-0.5);
 		shooter2.Set(0.5);
-		shooterlight.Set(1.0);
+		shooterlight->Set(Relay::kForward);
 	}
 	else
 	{
 		shooter1.Set(0.0);
 		shooter2.Set(0.0);
-		shooterlight.Set(0.0);
+		shooterlight->Set(Relay::kOff);
 	}
 }
 
